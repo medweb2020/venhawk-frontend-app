@@ -31,12 +31,12 @@ const Landing = () => {
   };
 
   const industryOptions = [
-    { value: 'financial', label: 'Financial Services' },
-    { value: 'healthcare', label: 'Healthcare' },
+    // { value: 'financial', label: 'Financial Services' },
+    // { value: 'healthcare', label: 'Healthcare' },
     { value: 'legal', label: 'Legal' },
-    { value: 'saas', label: 'SaaS' },
-    { value: 'technology', label: 'Technology' },
-    { value: 'government', label: 'Government Agency' },
+    // { value: 'saas', label: 'SaaS' },
+    // { value: 'technology', label: 'Technology' },
+    // { value: 'government', label: 'Government Agency' },
   ];
 
   const projectCategoryOptions = [
@@ -45,13 +45,13 @@ const Landing = () => {
     { value: 'cloud-migration', label: 'Cloud Migrations (AWS, Azure, GCP, hybrid cloud)' },
     { value: 'network', label: 'Network Infrastructure (LAN/WAN, SD-WAN, VPN)' },
     { value: 'security', label: 'Security Initiatives (IAM, SOC2 compliance, vulnerability management)' },
-    { value: 'collaboration', label: 'Collaboration Tools Deployment (Microsoft Teams, SharePoint, Slack, Google Workspace)' },
+    // { value: 'collaboration', label: 'Collaboration Tools Deployment (Microsoft Teams, SharePoint, Slack, Google Workspace)' },
     { value: 'data-analytics', label: 'Data & Analytics / BI (Data warehouses, dashboards, AI/ML pipelines)' },
     { value: 'disaster-recovery', label: 'Disaster Recovery / Business Continuity (DR planning, backup, failover systems)' },
     { value: 'itsm', label: 'IT Service Management / ITSM (ServiceNow, ticketing system)' },
     { value: 'endpoint', label: 'Endpoint Management / Device Upgrades (laptops, desktops, MDM)' },
-    { value: 'database', label: 'Database Migration / Optimization (SQL/NoSQL migration, tuning)' },
-    { value: 'virtualization', label: 'Infrastructure Virtualization (VMware, Hyper-V, containers)' },
+    // { value: 'database', label: 'Database Migration / Optimization (SQL/NoSQL migration, tuning)' },
+    // { value: 'virtualization', label: 'Infrastructure Virtualization (VMware, Hyper-V, containers)' },
     { value: 'cloud-security', label: 'Cloud Security / Compliance (cloud governance, policies, regulatory compliance)' },
     { value: 'other', label: 'Other' },
   ];
@@ -59,6 +59,13 @@ const Landing = () => {
   const handleChange = (field, value) => {
     updateProjectData({ [field]: value });
   };
+
+  // Set default industry if not already set
+  useEffect(() => {
+    if (!formData.clientIndustry && industryOptions.length === 1) {
+      updateProjectData({ clientIndustry: industryOptions[0].value });
+    }
+  }, []);
 
   // Check if all mandatory fields are filled
   const isFormValid = () => {
