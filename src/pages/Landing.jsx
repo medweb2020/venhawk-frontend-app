@@ -305,11 +305,13 @@ const Landing = () => {
 
                     {/* Upload Area */}
                     <div
-                      className={`border-2 border-dashed rounded-lg p-6 transition-all duration-200 cursor-pointer ${
-                        isDragging
+                      className={`border-2 border-dashed rounded-lg p-6 transition-all duration-200 ${
+                        uploadingFiles.length > 0
+                          ? 'border-blue-400 bg-blue-50'
+                          : isDragging
                           ? 'border-blue-500 bg-blue-50'
                           : 'border-gray-300 bg-gray-50 hover:bg-gray-100'
-                      } ${formData.fileUploads.length >= MAX_FILES ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      } ${formData.fileUploads.length >= MAX_FILES ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                       onDragEnter={handleDragEnter}
                       onDragOver={handleDragOver}
                       onDragLeave={handleDragLeave}
@@ -322,77 +324,95 @@ const Landing = () => {
                         multiple
                         className="hidden"
                         onChange={handleFileSelect}
-                        disabled={formData.fileUploads.length >= MAX_FILES}
+                        disabled={formData.fileUploads.length >= MAX_FILES || uploadingFiles.length > 0}
                       />
-                      <label htmlFor="fileUploads" className="cursor-pointer block">
-                        <div className="flex flex-col items-center gap-3 text-gray-600">
-                          <svg
-                            className={`w-10 h-10 transition-colors ${
-                              isDragging ? 'text-blue-500' : 'text-gray-600'
-                            }`}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+
+                      {/* Show uploading progress */}
+                      {uploadingFiles.length > 0 ? (
+                        <div className="flex flex-col items-center gap-3">
+                          <svg className="w-10 h-10 animate-spin text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                           </svg>
                           <div className="text-center">
-                            <span className={`text-sm font-medium ${isDragging ? 'text-blue-600' : 'text-gray-700'}`}>
-                              {formData.fileUploads.length >= MAX_FILES
-                                ? 'Maximum files reached'
-                                : isDragging
-                                ? 'Drop files here'
-                                : 'Drag & drop files or click to upload'}
+                            <span className="text-sm font-medium text-blue-700">
+                              Uploading {uploadingFiles.length} file{uploadingFiles.length !== 1 ? 's' : ''}...
                             </span>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {formData.fileUploads.length >= MAX_FILES
-                                ? `You've reached the maximum of ${MAX_FILES} files`
-                                : `Upload up to ${MAX_FILES} files (PDFs, diagrams, specifications, etc.)`}
+                            <p className="text-xs text-blue-600 mt-2">
+                              {uploadingFiles.map(f => f.name).join(', ')}
                             </p>
                           </div>
                         </div>
-                      </label>
+                      ) : (
+                        /* Show normal drag/drop UI */
+                        <label htmlFor="fileUploads" className="cursor-pointer block">
+                          <div className="flex flex-col items-center gap-3 text-gray-600">
+                            <svg
+                              className={`w-10 h-10 transition-colors ${
+                                isDragging ? 'text-blue-500' : 'text-gray-600'
+                              }`}
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            <div className="text-center">
+                              <span className={`text-sm font-medium ${isDragging ? 'text-blue-600' : 'text-gray-700'}`}>
+                                {formData.fileUploads.length >= MAX_FILES
+                                  ? 'Maximum files reached'
+                                  : isDragging
+                                  ? 'Drop files here'
+                                  : 'Drag & drop files or click to upload'}
+                              </span>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {formData.fileUploads.length >= MAX_FILES
+                                  ? `You've reached the maximum of ${MAX_FILES} files`
+                                  : `Upload up to ${MAX_FILES} files (PDFs, diagrams, specifications, etc.)`}
+                              </p>
+                            </div>
+                          </div>
+                        </label>
+                      )}
                     </div>
 
-                    {/* Uploading Files */}
-                    {uploadingFiles.length > 0 && (
-                      <div className="mt-3 space-y-2">
-                        {uploadingFiles.map((file) => (
-                          <div key={file.id} className="flex items-center gap-2 text-sm text-gray-700 bg-blue-50 px-3 py-2 rounded">
-                            <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            <span className="flex-1">{file.name}</span>
-                            <span className="text-xs text-blue-600">Uploading...</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Uploaded Files */}
+                    {/* Uploaded Files - Compact chip layout with scrolling */}
                     {formData.fileUploads.length > 0 && (
-                      <div className="mt-3 space-y-2">
-                        {formData.fileUploads.map((file, index) => (
-                          <div key={index} className="flex items-center gap-2 text-sm text-gray-700 bg-green-50 border border-green-200 px-3 py-2 rounded">
-                            <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span className="flex-1">{file.fileName}</span>
-                            <span className="text-xs text-gray-500">
-                              {(file.fileSize / 1024).toFixed(1)} KB
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveFile(index)}
-                              className="text-red-600 hover:text-red-800 transition-colors"
-                              title="Remove file"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                              </svg>
-                            </button>
+                      <div className="mt-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-medium text-gray-600">
+                            {formData.fileUploads.length} file{formData.fileUploads.length !== 1 ? 's' : ''} uploaded
+                          </span>
+                        </div>
+                        <div className="max-h-32 overflow-y-auto">
+                          <div className="flex flex-wrap gap-2">
+                            {formData.fileUploads.map((file, index) => (
+                              <div
+                                key={index}
+                                className="inline-flex items-center gap-1.5 bg-green-50 border border-green-200 text-green-800 rounded-full px-3 py-1 text-xs group hover:bg-green-100 transition-colors"
+                              >
+                                <svg className="w-3 h-3 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span className="font-medium truncate max-w-[200px]" title={file.fileName}>
+                                  {file.fileName}
+                                </span>
+                                <span className="text-green-600">
+                                  ({(file.fileSize / 1024).toFixed(0)}KB)
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveFile(index)}
+                                  className="ml-1 text-red-500 hover:text-red-700 transition-colors opacity-70 group-hover:opacity-100"
+                                  title="Remove file"
+                                >
+                                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        </div>
                       </div>
                     )}
                   </div>
