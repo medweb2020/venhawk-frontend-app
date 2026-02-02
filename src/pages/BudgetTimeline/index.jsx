@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../../context/ProjectContext';
 import Header from '../../components/layout/Header';
@@ -9,6 +9,19 @@ import DatePicker from '../../components/common/DatePicker';
 import Button from '../../components/common/Button';
 
 /**
+ * Check if project data has required fields filled
+ * @param {Object} data - Project data object
+ * @returns {boolean} - True if required fields are filled
+ */
+const hasRequiredProjectData = (data) => {
+  return data &&
+         data.clientIndustry &&
+         data.projectTitle &&
+         data.projectObjective &&
+         data.businessRequirements;
+};
+
+/**
  * Budget & Timeline Page Component
  * @description Step 2: Collect budget and timeline information
  */
@@ -16,6 +29,13 @@ const BudgetTimeline = () => {
   const navigate = useNavigate();
   const { projectData, updateProjectData } = useProject();
   const [errors, setErrors] = useState({});
+
+  // Redirect to landing page if no project data from step 1 exists
+  useEffect(() => {
+    if (!hasRequiredProjectData(projectData)) {
+      navigate('/');
+    }
+  }, [projectData, navigate]);
 
   // Local state for this page's fields
   const formData = {

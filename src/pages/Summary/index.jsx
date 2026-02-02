@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useProject } from '../../context/ProjectContext';
@@ -11,15 +11,36 @@ import Button from '../../components/common/Button';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 /**
+ * Check if project data has required fields filled
+ * @param {Object} data - Project data object
+ * @returns {boolean} - True if required fields are filled
+ */
+const hasRequiredProjectData = (data) => {
+  return data &&
+         data.clientIndustry &&
+         data.projectTitle &&
+         data.startDate;
+};
+
+/**
  * Summary Page Component
  * @description Step 3: Review and submit all collected information
  */
 const Summary = () => {
   const navigate = useNavigate();
   const { getAccessTokenSilently } = useAuth0();
-  const { projectData, resetProjectData } = useProject();
+  const { projectData } = useProject();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+
+  console.log('Project data:', projectData);
+
+  // Redirect to landing page if no project data exists
+  useEffect(() => {
+    if (!hasRequiredProjectData(projectData)) {
+      navigate('/');
+    }
+  }, [projectData, navigate]);
 
   const handleEdit = () => {
     // Navigate back to first step to edit
@@ -96,18 +117,15 @@ const Summary = () => {
       // Transform and prepare project data for API
       const apiPayload = transformDataForBackend(projectData);
 
-      // Submit project data (files are already uploaded, URLs are included in payload)
+      // Submit project and get matched vendors
       const response = await projectAPI.submitProject(apiPayload, accessToken);
       console.log('Project submitted successfully:', response);
 
-      // Clear the form data
-      resetProjectData();
-
-      // Navigate to vendor results
+      // Navigate to vendors page to display results
       navigate('/vendors');
     } catch (err) {
       console.error('Error submitting project:', err);
-      setError(err.message || 'Failed to submit project. Please try again.');
+      setError(err.message || 'Failed to Find vendors. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -295,7 +313,7 @@ const Summary = () => {
                     onClick={handleSubmit}
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? 'Submitting...' : 'Submit Project'}
+                    {isSubmitting ? 'Finding vendors...' : 'Find Vendors'}
                   </Button>
                 </div>
               </div>
