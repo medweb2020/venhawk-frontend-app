@@ -24,7 +24,11 @@ const fetchAPI = async (endpoint, options = {}) => {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: 'An error occurred' }));
-      throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      // Throw error with full error data as JSON string so it can be parsed later
+      const errorMessage = typeof error.message === 'string'
+        ? error.message
+        : JSON.stringify(error);
+      throw new Error(errorMessage);
     }
 
     return await response.json();

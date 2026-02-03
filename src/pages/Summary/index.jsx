@@ -61,6 +61,7 @@ const Summary = () => {
       projectTitle: data.projectTitle,
       projectCategory: data.projectCategory,
       projectCategoryOther: data.projectCategoryOther || undefined,
+      systemName: data.systemName || undefined,
       projectObjective: data.projectObjective,
       businessRequirements: data.businessRequirements,
       technicalRequirements: data.technicalRequirements || undefined,
@@ -125,7 +126,19 @@ const Summary = () => {
       navigate('/vendors');
     } catch (err) {
       console.error('Error submitting project:', err);
-      setError(err.message || 'Failed to Find vendors. Please try again.');
+
+      // Parse error message - check if it's a validation error with multiple messages
+      try {
+        const errorData = JSON.parse(err.message);
+        if (errorData.message && Array.isArray(errorData.message)) {
+          setError(errorData.message);
+        } else {
+          setError([errorData.message || err.message || 'Failed to Find vendors. Please try again.']);
+        }
+      } catch (parseError) {
+        // If error message is not JSON, treat it as a single error
+        setError([err.message || 'Failed to Find vendors. Please try again.']);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -178,7 +191,15 @@ const Summary = () => {
                 {/* Error Message */}
                 {error && (
                   <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-sm text-red-800">{error}</p>
+                    {Array.isArray(error) ? (
+                      <ul className="list-disc list-inside text-sm text-red-800 space-y-1">
+                        {error.map((msg, index) => (
+                          <li key={index}>{msg}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-red-800">{error}</p>
+                    )}
                   </div>
                 )}
 
@@ -213,6 +234,14 @@ const Summary = () => {
                     <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Project Category</h3>
                     <p className="text-base text-gray-900 font-semibold">{getProjectCategoryLabel(projectData.projectCategory, projectData.projectCategoryOther)}</p>
                   </div>
+
+                  {/* System Name (conditional) */}
+                  {projectData.systemName && (
+                    <div>
+                      <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">System Name to be Implemented</h3>
+                      <p className="text-base text-gray-900 font-semibold">{projectData.systemName}</p>
+                    </div>
+                  )}
 
                   {/* Project Objective */}
                   <div>

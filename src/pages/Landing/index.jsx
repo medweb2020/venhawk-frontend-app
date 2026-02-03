@@ -26,6 +26,7 @@ const Landing = () => {
     projectTitle: projectData.projectTitle,
     projectCategory: projectData.projectCategory,
     projectCategoryOther: projectData.projectCategoryOther,
+    systemName: projectData.systemName,
     projectObjective: projectData.projectObjective,
     businessRequirements: projectData.businessRequirements,
     technicalRequirements: projectData.technicalRequirements,
@@ -49,6 +50,7 @@ const Landing = () => {
       formData.clientIndustry &&
       formData.projectTitle &&
       formData.projectCategory &&
+      formData.systemName &&
       formData.projectObjective &&
       formData.businessRequirements;
 
@@ -143,6 +145,15 @@ const Landing = () => {
                       </div>
                     )}
                   </div>
+
+                  <Input
+                    label="System Name to be Implemented"
+                    name="systemName"
+                    placeholder="e.g., Intapp, iManage, ServiceNow, Workday"
+                    value={formData.systemName}
+                    onChange={(e) => handleChange('systemName', e.target.value)}
+                    required
+                  />
 
                   <Textarea
                     label="Project Objective"
