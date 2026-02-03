@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Header from '../../components/layout/Header';
 import VendorCard from './components/VendorCard';
+import VenAISearchBanner from './components/VenAISearchBanner';
 import { mockVendors } from './mockVendors';
 
 /**
@@ -50,6 +51,9 @@ const Vendors = () => {
             Filters
           </button>
         </div>
+
+        {/* VenAI Search Banner */}
+        <VenAISearchBanner />
 
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Sidebar Filters - Hidden on mobile, visible on desktop */}
