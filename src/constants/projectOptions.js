@@ -12,10 +12,6 @@ export const PROJECT_CATEGORY_OPTIONS = [
   { value: 'cloud-migration', label: 'Cloud Migrations & Modernization (Azure, AWS, GCP, hybrid cloud)' },
   { value: 'enterprise-it', label: 'Enterprise IT Implementations & Modernization (ServiceNow, Workday, M365 migrations, AV systems)' },
   { value: 'app-upgrades', label: 'Application Upgrades & Integrations (Legacy apps, custom systems, APIs)' },
-  { value: 'collaboration', label: 'Collaboration & Document Management (Microsoft Teams, SharePoint, M365)' },
-  { value: 'security', label: 'Security, Identity & Compliance (IAM, Entra ID, SOC2, zero trust)' },
-  { value: 'data-archive', label: 'Data, Archive & eDiscovery (Email archive, retention, eDiscovery)' },
-  { value: 'other', label: 'Other' },
 ];
 
 /**
