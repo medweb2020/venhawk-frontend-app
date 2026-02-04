@@ -11,7 +11,8 @@ export const PROJECT_CATEGORY_OPTIONS = [
   { value: 'legal-apps', label: 'Legal Application Implementations & Migrations (Intapp, iManage, NetDocuments, Elite, Aderant)' },
   { value: 'cloud-migration', label: 'Cloud Migrations & Modernization (Azure, AWS, GCP, hybrid cloud)' },
   { value: 'enterprise-it', label: 'Enterprise IT Implementations & Modernization (ServiceNow, Workday, M365 migrations, AV systems)' },
-  { value: 'app-upgrades', label: 'Application Upgrades & Integrations (Legacy apps, custom systems, APIs)' },
+  // { value: 'app-upgrades', label: 'Application Upgrades & Integrations (Legacy apps, custom systems, APIs)' },
+  { value: 'app-bug-fixes', label: 'Application Bug Fixes & Integrations (Legacy apps, custom systems, APIs)' },
 ];
 
 /**
