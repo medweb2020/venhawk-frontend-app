@@ -24,7 +24,11 @@ const fetchAPI = async (endpoint, options = {}) => {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: 'An error occurred' }));
-      throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      // Throw error with full error data as JSON string so it can be parsed later
+      const errorMessage = typeof error.message === 'string'
+        ? error.message
+        : JSON.stringify(error);
+      throw new Error(errorMessage);
     }
 
     return await response.json();
@@ -127,7 +131,68 @@ export const userAPI = {
   },
 };
 
+/**
+ * File API Service
+ */
+export const fileAPI = {
+  /**
+   * Upload a single file to Supabase
+   * @param {File} file - File object to upload
+   * @param {string} accessToken - Auth0 access token
+   * @returns {Promise<Object>} File upload response with fileUrl, fileName, fileSize, mimeType
+   */
+  uploadFile: async (file, accessToken) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${API_BASE_URL}/files/upload`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'File upload failed' }));
+      throw new Error(error.message || `HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  },
+
+  /**
+   * Delete a file from Supabase
+   * @param {string} fileUrl - Full URL of the file to delete
+   * @param {string} accessToken - Auth0 access token
+   * @returns {Promise<Object>} Delete response
+   */
+  deleteFile: async (fileUrl, accessToken) => {
+    const response = await fetch(`${API_BASE_URL}/files`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ fileUrl }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'File deletion failed' }));
+      throw new Error(error.message || `HTTP error! status: ${response.status}`);
+    }
+
+    // 204 No Content has no response body
+    if (response.status === 204) {
+      return { success: true };
+    }
+
+    return await response.json();
+  },
+};
+
 export default {
   projectAPI,
   userAPI,
+  fileAPI,
 };

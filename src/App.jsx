@@ -3,8 +3,10 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import Landing from './pages/Landing';
 import BudgetTimeline from './pages/BudgetTimeline';
 import Summary from './pages/Summary';
+import Vendors from './pages/Vendors';
 import Login from './pages/Login';
 import Callback from './pages/Callback';
+import NotFound from './pages/NotFound';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import { useUserSync } from './hooks/useUserSync';
 
@@ -55,10 +57,13 @@ function App() {
         path="/vendors"
         element={
           <ProtectedRoute>
-            <div>Vendor Results Page</div>
+            <Vendors />
           </ProtectedRoute>
         }
       />
+
+      {/* 404 Not Found - catch all unmatched routes */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

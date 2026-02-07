@@ -15,6 +15,7 @@ export const ProjectProvider = ({ children }) => {
     projectTitle: '',
     projectCategory: '',
     projectCategoryOther: '',
+    systemName: '',
     projectObjective: '',
     businessRequirements: '',
     technicalRequirements: '',
@@ -28,11 +29,18 @@ export const ProjectProvider = ({ children }) => {
     totalBudget: '',
     minBudget: '',
     maxBudget: '',
+
+    // Matched vendors from API response
+    matchedVendors: [],
   });
 
-  // Update specific fields
+  // Update specific fields - supports both object and function
   const updateProjectData = (updates) => {
-    setProjectData(prev => ({ ...prev, ...updates }));
+    if (typeof updates === 'function') {
+      setProjectData(updates);
+    } else {
+      setProjectData(prev => ({ ...prev, ...updates }));
+    }
   };
 
   // Reset all data
@@ -42,6 +50,7 @@ export const ProjectProvider = ({ children }) => {
       projectTitle: '',
       projectCategory: '',
       projectCategoryOther: '',
+      systemName: '',
       projectObjective: '',
       businessRequirements: '',
       technicalRequirements: '',
@@ -53,6 +62,7 @@ export const ProjectProvider = ({ children }) => {
       totalBudget: '',
       minBudget: '',
       maxBudget: '',
+      matchedVendors: [],
     });
   };
 
