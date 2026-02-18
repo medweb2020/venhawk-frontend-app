@@ -1,12 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
-import { useProject } from '../context/ProjectContext';
-import { projectAPI } from '../services/api';
-import Header from '../components/layout/Header';
-import Stepper from '../components/common/Stepper';
-import Button from '../components/common/Button';
-import LoadingSpinner from '../components/common/LoadingSpinner';
+import { useProject } from '../../context/ProjectContext';
+import { projectAPI } from '../../services/api';
+import { getIndustryLabel, getProjectCategoryLabel } from '../../constants/projectOptions';
+import Header from '../../components/layout/Header';
+import LeftSidebar from '../../components/layout/LeftSidebar';
+import Stepper from '../../components/common/Stepper';
+import Button from '../../components/common/Button';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
+
+/**
+ * Check if project data has required fields filled
+ * @param {Object} data - Project data object
+ * @returns {boolean} - True if required fields are filled
+ */
+const hasRequiredProjectData = (data) => {
+  return data &&
+         data.clientIndustry &&
+         data.projectTitle &&
+         data.startDate;
+};
 
 /**
  * Summary Page Component
@@ -15,42 +29,18 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 const Summary = () => {
   const navigate = useNavigate();
   const { getAccessTokenSilently } = useAuth0();
-  const { projectData, resetProjectData } = useProject();
+  const { projectData, updateProjectData } = useProject();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
-  // Get industry and category labels for display
-  const getIndustryLabel = (value) => {
-    const industryMap = {
-      'financial': 'Financial Services',
-      'healthcare': 'Healthcare',
-      'legal': 'Legal',
-      'saas': 'SaaS',
-      'technology': 'Technology',
-      'government': 'Government Agency',
-    };
-    return industryMap[value] || value;
-  };
+  console.log('Project data:', projectData);
 
-  const getCategoryLabel = (value) => {
-    const categoryMap = {
-      'erp': 'ERP Implementations (SAP, Oracle, Microsoft Dynamics)',
-      'app-upgrades': 'Application Upgrades (Legacy systems, custom apps, feature rollouts)',
-      'cloud-migration': 'Cloud Migrations (AWS, Azure, GCP, hybrid cloud)',
-      'network': 'Network Infrastructure (LAN/WAN, SD-WAN, VPN)',
-      'security': 'Security Initiatives (IAM, SOC2 compliance, vulnerability management)',
-      'collaboration': 'Collaboration Tools Deployment (Microsoft Teams, SharePoint, Slack, Google Workspace)',
-      'data-analytics': 'Data & Analytics / BI (Data warehouses, dashboards, AI/ML pipelines)',
-      'disaster-recovery': 'Disaster Recovery / Business Continuity (DR planning, backup, failover systems)',
-      'itsm': 'IT Service Management / ITSM (ServiceNow, ticketing system)',
-      'endpoint': 'Endpoint Management / Device Upgrades (laptops, desktops, MDM)',
-      'database': 'Database Migration / Optimization (SQL/NoSQL migration, tuning)',
-      'virtualization': 'Infrastructure Virtualization (VMware, Hyper-V, containers)',
-      'cloud-security': 'Cloud Security / Compliance (cloud governance, policies, regulatory compliance)',
-      'other': projectData.projectCategoryOther || 'Other',
-    };
-    return categoryMap[value] || value;
-  };
+  // Redirect to landing page if no project data exists
+  useEffect(() => {
+    if (!hasRequiredProjectData(projectData)) {
+      navigate('/');
+    }
+  }, [projectData, navigate]);
 
   const handleEdit = () => {
     // Navigate back to first step to edit
@@ -71,9 +61,13 @@ const Summary = () => {
       projectTitle: data.projectTitle,
       projectCategory: data.projectCategory,
       projectCategoryOther: data.projectCategoryOther || undefined,
+      systemName: data.systemName || undefined,
       projectObjective: data.projectObjective,
       businessRequirements: data.businessRequirements,
       technicalRequirements: data.technicalRequirements || undefined,
+
+      // File uploads - Send array of file URLs
+      fileUrls: data.fileUploads?.map(file => file.fileUrl) || [],
 
       // Page 2 fields - Transform dates from mm/dd/yyyy to yyyy-mm-dd
       startDate: data.startDate ? convertToISODate(data.startDate) : undefined,
@@ -124,23 +118,32 @@ const Summary = () => {
       // Transform and prepare project data for API
       const apiPayload = transformDataForBackend(projectData);
 
-      // Submit project data
+      // Submit project and get matched vendors
       const response = await projectAPI.submitProject(apiPayload, accessToken);
       console.log('Project submitted successfully:', response);
 
-      // If there are files, upload them
-      if (projectData.fileUploads && projectData.fileUploads.length > 0 && response.id) {
-        await projectAPI.uploadFiles(response.id, projectData.fileUploads, accessToken);
+      // Store matched vendors in context
+      if (response.matchedVendors) {
+        updateProjectData({ matchedVendors: response.matchedVendors });
       }
 
-      // Clear the form data
-      resetProjectData();
-
-      // Navigate to vendor results
+      // Navigate to vendors page to display results
       navigate('/vendors');
     } catch (err) {
       console.error('Error submitting project:', err);
-      setError(err.message || 'Failed to submit project. Please try again.');
+
+      // Parse error message - check if it's a validation error with multiple messages
+      try {
+        const errorData = JSON.parse(err.message);
+        if (errorData.message && Array.isArray(errorData.message)) {
+          setError(errorData.message);
+        } else {
+          setError([errorData.message || err.message || 'Failed to Find vendors. Please try again.']);
+        }
+      } catch (parseError) {
+        // If error message is not JSON, treat it as a single error
+        setError([err.message || 'Failed to Find vendors. Please try again.']);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -162,37 +165,7 @@ const Summary = () => {
       <div className="flex-1 bg-gray-100 overflow-auto">
         <div className="relative min-h-full flex flex-col lg:flex-row">
           {/* Left Section with background */}
-          <div className="lg:w-[28%] px-8 py-8 lg:py-12 relative">
-            {/* Decorative curved lines - fixed at viewport, limited height */}
-            <div className="fixed top-0 left-0 w-[28%] h-[60vh] pointer-events-none opacity-40 hidden lg:block">
-              <svg
-                className="absolute top-0 left-0 w-full h-full"
-                viewBox="0 0 400 600"
-                fill="none"
-                preserveAspectRatio="none"
-              >
-                {Array.from({ length: 40 }).map((_, i) => (
-                  <path
-                    key={i}
-                    d={`M 0 ${300 + i * 8} Q 100 ${250 + i * 8} 200 ${300 + i * 8} T 400 ${300 + i * 8}`}
-                    stroke={i < 20 ? '#9ca3af' : '#fb923c'}
-                    strokeWidth="1"
-                    fill="none"
-                    opacity={i < 20 ? 0.4 : 0.3}
-                  />
-                ))}
-              </svg>
-            </div>
-
-            {/* Vertical Progress Line - fixed at viewport */}
-            <div className="hidden lg:block fixed top-0 left-[28%] h-screen w-1 bg-gradient-to-b from-blue-500 via-blue-400 to-transparent"></div>
-
-            <div className="relative z-10">
-              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6 leading-tight">
-                Let's Find the best Vendors
-              </h1>
-            </div>
-          </div>
+          <LeftSidebar />
 
           {/* Right Section */}
           <div className="flex-1 lg:px-12 px-6 py-8 flex flex-col items-center">
@@ -223,7 +196,15 @@ const Summary = () => {
                 {/* Error Message */}
                 {error && (
                   <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-sm text-red-800">{error}</p>
+                    {Array.isArray(error) ? (
+                      <ul className="list-disc list-inside text-sm text-red-800 space-y-1">
+                        {error.map((msg, index) => (
+                          <li key={index}>{msg}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-red-800">{error}</p>
+                    )}
                   </div>
                 )}
 
@@ -256,8 +237,16 @@ const Summary = () => {
                   {/* Project Category */}
                   <div>
                     <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Project Category</h3>
-                    <p className="text-base text-gray-900 font-semibold">{getCategoryLabel(projectData.projectCategory)}</p>
+                    <p className="text-base text-gray-900 font-semibold">{getProjectCategoryLabel(projectData.projectCategory, projectData.projectCategoryOther)}</p>
                   </div>
+
+                  {/* System Name (conditional) */}
+                  {projectData.systemName && (
+                    <div>
+                      <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">System Name to be Implemented</h3>
+                      <p className="text-base text-gray-900 font-semibold">{projectData.systemName}</p>
+                    </div>
+                  )}
 
                   {/* Project Objective */}
                   <div>
@@ -285,15 +274,21 @@ const Summary = () => {
                       <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Uploaded Files</h3>
                       <div className="flex flex-wrap gap-2">
                         {projectData.fileUploads.map((file, index) => (
-                          <div
+                          <a
                             key={index}
-                            className="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full px-3 py-1.5 text-sm font-medium shadow-sm hover:shadow-md transition-all duration-200"
+                            href={file.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-full px-3 py-1.5 text-sm font-medium shadow-sm hover:shadow-md transition-all duration-200"
                           >
                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                             </svg>
-                            <span className="font-semibold">{file.name}</span>
-                          </div>
+                            <span className="font-semibold">{file.fileName}</span>
+                            <span className="text-xs text-blue-600">
+                              {(file.fileSize / 1024).toFixed(1)} KB
+                            </span>
+                          </a>
                         ))}
                       </div>
                     </div>
@@ -352,7 +347,7 @@ const Summary = () => {
                     onClick={handleSubmit}
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? 'Submitting...' : 'Submit Project'}
+                    {isSubmitting ? 'Finding vendors...' : 'Find Vendors'}
                   </Button>
                 </div>
               </div>

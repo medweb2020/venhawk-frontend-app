@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
+import { useState } from 'react';
 
 /**
  * Textarea Component
@@ -17,8 +18,11 @@ const Textarea = ({
   disabled = false,
   rows = 4,
   className,
+  tooltip,
   ...rest
 }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+
   return (
     <div className="w-full">
       {label && (
@@ -26,8 +30,31 @@ const Textarea = ({
           htmlFor={name}
           className="block text-sm font-normal text-gray-700 mb-2"
         >
-          {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          <span className="inline-flex items-center gap-2">
+            <span>
+              {label}
+              {required && <span className="text-red-500 ml-1">*</span>}
+            </span>
+            {tooltip && (
+              <div className="relative inline-block">
+                <div
+                  className="w-4 h-4 rounded-full bg-blue-100 hover:bg-blue-500 border border-blue-300 hover:border-blue-600 flex items-center justify-center cursor-help transition-all duration-200 group shadow-sm"
+                  onMouseEnter={() => setShowTooltip(true)}
+                  onMouseLeave={() => setShowTooltip(false)}
+                >
+                  <span className="text-[10px] font-bold text-blue-600 group-hover:text-white transition-colors">
+                    i
+                  </span>
+                </div>
+                {showTooltip && (
+                  <div className="absolute left-0 top-6 z-50 w-80 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-xl animate-in fade-in slide-in-from-top-1 duration-200">
+                    <div className="absolute -top-1 left-2 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+                    {tooltip}
+                  </div>
+                )}
+              </div>
+            )}
+          </span>
         </label>
       )}
       <textarea
@@ -72,6 +99,7 @@ Textarea.propTypes = {
   disabled: PropTypes.bool,
   rows: PropTypes.number,
   className: PropTypes.string,
+  tooltip: PropTypes.string,
 };
 
 export default Textarea;
