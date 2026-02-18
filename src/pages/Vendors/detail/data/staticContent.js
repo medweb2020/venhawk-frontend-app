@@ -1,16 +1,44 @@
+import attLogo from '../../../../assets/clients/at-t.svg';
+import hiltonLogo from '../../../../assets/clients/hilton.svg';
+import hpLogo from '../../../../assets/clients/hp.svg';
+import stateStreetLogo from '../../../../assets/clients/state-street.svg';
+import verizonLogo from '../../../../assets/clients/verizon.svg';
+
 export const VENDOR_PAGE_COPY = {
   demoPrompt: 'You can always request a demo from this vendor!',
 };
 
 export const KEY_CLIENTS = [
-  { id: 'hp', label: 'hp', weightClass: 'font-semibold', sizeClass: 'text-[54px]' },
-  { id: 'verizon', label: 'verizon', weightClass: 'font-semibold', sizeClass: 'text-[34px]' },
-  { id: 'state-street', label: 'STATE STREET', weightClass: 'font-medium', sizeClass: 'text-[24px]' },
-  { id: 'att', label: 'at&t', weightClass: 'font-medium', sizeClass: 'text-[50px]' },
-  { id: 'hilton', label: 'Hilton', weightClass: 'font-medium', sizeClass: 'text-[40px]' },
-  { id: 'oracle', label: 'ORACLE', weightClass: 'font-semibold', sizeClass: 'text-[36px]' },
-  { id: 'cisco', label: 'CISCO', weightClass: 'font-semibold', sizeClass: 'text-[34px]' },
-  { id: 'adobe', label: 'adobe', weightClass: 'font-medium', sizeClass: 'text-[38px]' },
+  {
+    id: 'hp',
+    label: 'HP',
+    logoSrc: hpLogo,
+    logoClassName: 'h-[64px] sm:h-[72px] w-auto object-contain',
+  },
+  {
+    id: 'verizon',
+    label: 'Verizon',
+    logoSrc: verizonLogo,
+    logoClassName: 'h-[48px] sm:h-[56px] w-auto object-contain',
+  },
+  {
+    id: 'state-street',
+    label: 'State Street',
+    logoSrc: stateStreetLogo,
+    logoClassName: 'h-[54px] sm:h-[62px] w-auto object-contain',
+  },
+  {
+    id: 'att',
+    label: 'AT&T',
+    logoSrc: attLogo,
+    logoClassName: 'h-[52px] sm:h-[60px] w-auto object-contain',
+  },
+  {
+    id: 'hilton',
+    label: 'Hilton',
+    logoSrc: hiltonLogo,
+    logoClassName: 'h-[46px] sm:h-[52px] w-auto object-contain',
+  },
 ];
 
 export const CASE_STUDIES = [

@@ -15,11 +15,20 @@ const KeyClientsSection = ({ clients }) => {
           {clients.map((client) => (
             <div
               key={client.id}
-              className="h-[86px] sm:h-[96px] min-w-[180px] sm:min-w-[220px] px-6 sm:px-8 flex items-center justify-center border-r border-[#F1F1F1] last:border-r-0"
+              className="h-[86px] sm:h-[96px] min-w-[180px] sm:min-w-[220px] px-6 sm:px-8 flex items-center justify-center"
             >
-              <span className={`uppercase text-[#8F939A] ${client.weightClass} ${client.sizeClass} leading-none tracking-tight`}>
-                {client.label}
-              </span>
+              {client.logoSrc ? (
+                <img
+                  src={client.logoSrc}
+                  alt={client.label}
+                  className={client.logoClassName || 'h-[48px] w-auto object-contain'}
+                  loading="lazy"
+                />
+              ) : (
+                <span className="uppercase text-[#8F939A] font-semibold text-[30px] leading-none tracking-tight">
+                  {client.label}
+                </span>
+              )}
             </div>
           ))}
         </div>

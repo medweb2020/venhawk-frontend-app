@@ -1,5 +1,6 @@
 import StarRating from '../../components/StarRating';
 import TierBadge from '../../components/TierBadge';
+import VendorImage from '../../components/VendorImage';
 
 const formatWebsite = (websiteUrl, logoUrl) => {
   if (websiteUrl) {
@@ -25,26 +26,22 @@ const VendorProfilePanel = ({ vendor }) => {
   return (
     <section className="w-full xl:max-w-[560px] min-h-[430px] flex flex-col justify-between">
       <div>
-        <div className="relative flex items-center gap-3 sm:gap-4">
-          <div className="w-[62px] h-[62px] sm:w-[70px] sm:h-[70px] rounded-full overflow-hidden bg-[#F1F3F5] shrink-0 flex items-center justify-center">
-            {vendor.logoUrl ? (
-              <img
-                src={vendor.logoUrl}
-                alt={`${vendor.name} logo`}
-                className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <span className="text-[20px] sm:text-[24px] font-bold text-[#3D464F]">
-                {vendor.name.slice(0, 2).toUpperCase()}
-              </span>
-            )}
-          </div>
+        <div className="relative flex items-start gap-3 sm:gap-4">
+          <VendorImage
+            src={vendor.logoUrl}
+            alt={`${vendor.name} logo`}
+            name={vendor.name}
+            wrapperClassName="w-[62px] h-[62px] sm:w-[70px] sm:h-[70px] rounded-full shrink-0"
+            initialsClassName="text-[20px] sm:text-[24px]"
+          />
 
-          <div className="relative flex-1 pr-[60px] sm:pr-[70px]">
-            <h1 className="text-[24px] sm:text-[30px] lg:text-[40px] leading-[1.1] font-bold text-[#3D464F] break-words">
-              {vendor.name}
-            </h1>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2 sm:gap-3">
+              <h1 className="text-[24px] sm:text-[30px] lg:text-[40px] leading-[1.1] font-bold text-[#3D464F] break-words min-w-0">
+                {vendor.name}
+              </h1>
+              <TierBadge tier={vendor.tier} className="shrink-0 mt-[2px]" />
+            </div>
             <div className="mt-1 flex items-center gap-2 text-[12px] sm:text-[13px]">
               <span className="font-semibold text-[#535B64] truncate">{vendor.category}</span>
               <span className="w-[7px] h-[7px] rounded-full bg-[#D9D9D9] shrink-0" />
@@ -58,8 +55,6 @@ const VendorProfilePanel = ({ vendor }) => {
                 valueClassName="text-[18px] sm:text-[20px] leading-none font-semibold text-[#3D464F]"
               />
             </div>
-
-            <TierBadge tier={vendor.tier} className="absolute top-0 right-0 scale-90 sm:scale-100 origin-top-right" />
           </div>
         </div>
 

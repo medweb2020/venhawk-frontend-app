@@ -1,5 +1,6 @@
 import { CalendarIcon, PlayCircleIcon } from './icons';
 import { VENDOR_PAGE_COPY } from '../data/staticContent';
+import VendorImage from '../../components/VendorImage';
 
 const VendorActionPanel = ({ vendor }) => {
   return (
@@ -25,18 +26,16 @@ const VendorActionPanel = ({ vendor }) => {
 
       <div className="mt-[6px] h-[220px] sm:h-[286px] rounded-[4px] overflow-hidden bg-[linear-gradient(125deg,#84AFE8_0%,#BCD4F6_52%,#EDF5FF_100%)] relative">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,rgba(10,37,64,0.15),transparent_44%)]" />
-        {vendor.logoUrl ? (
-          <img
-            src={vendor.logoUrl}
-            alt={`${vendor.name} showcase`}
-            className="relative z-10 w-full h-full object-contain p-6 sm:p-9"
-            referrerPolicy="no-referrer"
-          />
-        ) : (
-          <div className="relative z-10 h-full flex items-center justify-center text-[72px] font-bold text-[#0A2540]">
-            {vendor.name.slice(0, 2).toUpperCase()}
-          </div>
-        )}
+        <VendorImage
+          src={vendor.logoUrl}
+          alt={`${vendor.name} showcase`}
+          name={vendor.name}
+          objectFit="contain"
+          wrapperClassName="relative z-10 w-full h-full"
+          imgClassName="p-6 sm:p-9"
+          fallbackClassName="bg-transparent"
+          initialsClassName="text-[56px] sm:text-[72px] text-[#0A2540]"
+        />
       </div>
 
       <div className="mt-[6px] grid grid-cols-2 gap-[6px]">

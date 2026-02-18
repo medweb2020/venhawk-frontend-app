@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import StarRating from './StarRating';
 import TierBadge from './TierBadge';
+import VendorImage from './VendorImage';
 
 const VendorCard = ({ vendor }) => {
   const detailPath = `/vendors/${vendor.vendorId || vendor.id}`;
@@ -9,19 +10,13 @@ const VendorCard = ({ vendor }) => {
     <Link to={detailPath} className="block group">
       <article className="bg-[#FCFCFC] border border-[#E9EAEC] rounded-[12px] p-4 transition-all duration-200 group-hover:shadow-md group-hover:-translate-y-[1px]">
         <div className="relative flex gap-4 items-start mb-4">
-          <div className="w-[76px] h-[76px] rounded-full overflow-hidden bg-transparent flex items-center justify-center shrink-0">
-            {vendor.logoUrl ? (
-              <img
-                src={vendor.logoUrl}
-                alt={`${vendor.name} logo`}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span className="text-[18px] font-bold text-[#3D464F]">
-                {vendor.name.slice(0, 2).toUpperCase()}
-              </span>
-            )}
-          </div>
+          <VendorImage
+            src={vendor.logoUrl}
+            alt={`${vendor.name} logo`}
+            name={vendor.name}
+            wrapperClassName="w-[76px] h-[76px] rounded-full shrink-0"
+            initialsClassName="text-[18px]"
+          />
 
           <div className="min-w-0 flex-1 relative">
             <h3 className="text-[14px] font-semibold text-[#3D464F] truncate pr-16">{vendor.name}</h3>
