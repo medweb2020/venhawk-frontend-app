@@ -1,51 +1,12 @@
-import { useEffect, useState } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
 import Header from '../../components/layout/Header';
-import { vendorsAPI } from '../../services/api';
 import EmptyState from './components/EmptyState';
 import FiltersPanel from './components/FiltersPanel';
 import VendorCard from './components/VendorCard';
 import VenAISearchBanner from './components/VenAISearchBanner';
+import { useVendorListing } from './hooks/useVendorListing';
 
 const Vendors = () => {
-  const { getAccessTokenSilently } = useAuth0();
-
-  const [vendors, setVendors] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadListingVendors = async () => {
-      try {
-        setLoading(true);
-        setError('');
-
-        const accessToken = await getAccessTokenSilently();
-        const response = await vendorsAPI.getListing(accessToken);
-
-        if (isMounted) {
-          setVendors(Array.isArray(response) ? response : []);
-        }
-      } catch (err) {
-        if (isMounted) {
-          setError(err.message || 'Failed to load vendors.');
-          setVendors([]);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadListingVendors();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [getAccessTokenSilently]);
+  const { vendors, loading, error } = useVendorListing();
 
   return (
     <div className="min-h-screen bg-[#F9F7F7]">

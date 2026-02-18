@@ -207,6 +207,20 @@ export const vendorsAPI = {
       },
     });
   },
+
+  /**
+   * Get a single procurement listing vendor
+   * @param {string} vendorId - Vendor UUID
+   * @param {string} accessToken - Auth0 access token
+   * @returns {Promise<Object>} Vendor listing card data
+   */
+  getListingVendor: async (vendorId, accessToken) => {
+    return fetchAPI(`/vendors/listing/${vendorId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  },
 };
 
 export default {
