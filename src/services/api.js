@@ -191,8 +191,27 @@ export const fileAPI = {
   },
 };
 
+/**
+ * Vendors API Service
+ */
+export const vendorsAPI = {
+  /**
+   * Get procurement listing vendors
+   * @param {string} accessToken - Auth0 access token
+   * @returns {Promise<Array>} Vendor listing cards
+   */
+  getListing: async (accessToken) => {
+    return fetchAPI('/vendors/listing', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  },
+};
+
 export default {
   projectAPI,
   userAPI,
   fileAPI,
+  vendorsAPI,
 };
