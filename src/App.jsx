@@ -4,6 +4,7 @@ import Landing from './pages/Landing';
 import BudgetTimeline from './pages/BudgetTimeline';
 import Summary from './pages/Summary';
 import Vendors from './pages/Vendors';
+import VendorDetail from './pages/Vendors/detail';
 import Login from './pages/Login';
 import Callback from './pages/Callback';
 import NotFound from './pages/NotFound';
@@ -58,6 +59,14 @@ function App() {
         element={
           <ProtectedRoute>
             <Vendors />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/vendors/:vendorId"
+        element={
+          <ProtectedRoute>
+            <VendorDetail />
           </ProtectedRoute>
         }
       />

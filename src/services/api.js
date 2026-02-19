@@ -191,8 +191,41 @@ export const fileAPI = {
   },
 };
 
+/**
+ * Vendors API Service
+ */
+export const vendorsAPI = {
+  /**
+   * Get procurement listing vendors
+   * @param {string} accessToken - Auth0 access token
+   * @returns {Promise<Array>} Vendor listing cards
+   */
+  getListing: async (accessToken) => {
+    return fetchAPI('/vendors/listing', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  },
+
+  /**
+   * Get a single procurement listing vendor
+   * @param {string} vendorId - Vendor UUID
+   * @param {string} accessToken - Auth0 access token
+   * @returns {Promise<Object>} Vendor listing card data
+   */
+  getListingVendor: async (vendorId, accessToken) => {
+    return fetchAPI(`/vendors/listing/${vendorId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  },
+};
+
 export default {
   projectAPI,
   userAPI,
   fileAPI,
+  vendorsAPI,
 };
