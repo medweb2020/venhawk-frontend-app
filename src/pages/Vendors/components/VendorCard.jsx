@@ -7,7 +7,7 @@ const VendorCard = ({ vendor }) => {
   const detailPath = `/vendors/${vendor.vendorId || vendor.id}`;
 
   return (
-    <Link to={detailPath} className="block group">
+    <Link to={detailPath} className="block group cursor-pointer">
       <article className="bg-[#FCFCFC] border border-[#E9EAEC] rounded-[12px] p-4 transition-all duration-200 group-hover:shadow-md group-hover:-translate-y-[1px]">
         <div className="relative flex gap-4 items-start mb-4">
           <VendorImage

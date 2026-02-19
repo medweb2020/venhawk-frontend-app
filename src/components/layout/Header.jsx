@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import Avatar from '../common/Avatar';
 import VenHawkLogo from '../../assets/venhawk.svg';
+import VenAiLogo from '../../assets/ven-ai.svg';
 
 /**
  * Header Component
@@ -21,20 +22,22 @@ const Header = () => {
       <div className="w-full px-6 lg:px-8 py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center">
+          <Link to="/" className="flex items-center cursor-pointer">
             <img src={VenHawkLogo} alt="VenHawk" className="h-5 md:h-6 w-auto" />
           </Link>
 
           {/* Right side */}
           {isAuthenticated && (
             <div className="flex items-center gap-4">
+              <img src={VenAiLogo} alt="Ven AI" className="h-5 md:h-6 w-auto" />
+
               {/* User info - Desktop */}
               <div className="hidden md:flex items-center gap-3">
                 <span className="text-sm text-gray-700 font-semibold">{user?.name || user?.email}</span>
                 <div className="relative">
                   <button
                     onClick={() => setShowDropdown(!showDropdown)}
-                    className="focus:outline-none"
+                    className="focus:outline-none cursor-pointer"
                   >
                     <Avatar
                       src={user?.picture}
@@ -49,14 +52,14 @@ const Header = () => {
                     <>
                       {/* Backdrop */}
                       <div
-                        className="fixed inset-0 z-10"
+                        className="fixed inset-0 z-10 cursor-pointer"
                         onClick={() => setShowDropdown(false)}
                       />
                       {/* Menu */}
                       <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
                         <button
                           onClick={handleLogout}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -73,7 +76,7 @@ const Header = () => {
               <div className="md:hidden relative">
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="focus:outline-none"
+                  className="focus:outline-none cursor-pointer"
                 >
                   <Avatar
                     src={user?.picture}
@@ -88,7 +91,7 @@ const Header = () => {
                   <>
                     {/* Backdrop */}
                     <div
-                      className="fixed inset-0 z-10"
+                      className="fixed inset-0 z-10 cursor-pointer"
                       onClick={() => setShowDropdown(false)}
                     />
                     {/* Menu */}
@@ -99,7 +102,7 @@ const Header = () => {
                       </div>
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
