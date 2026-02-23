@@ -6,7 +6,18 @@ import VenAISearchBanner from './components/VenAISearchBanner';
 import { useVendorListing } from './hooks/useVendorListing';
 
 const Vendors = () => {
-  const { vendors, loading, error } = useVendorListing();
+  const {
+    vendors,
+    loading,
+    error,
+    filters,
+    filterGroups,
+    filterOptionsLoading,
+    filterOptionsError,
+    activeFilterCount,
+    toggleFilterOption,
+    clearFilters,
+  } = useVendorListing();
 
   return (
     <div className="min-h-screen bg-[#F9F7F7]">
@@ -24,9 +35,23 @@ const Vendors = () => {
         )}
 
         <div className="flex flex-col lg:flex-row gap-6">
-          <FiltersPanel />
+          <FiltersPanel
+            filterGroups={filterGroups}
+            filters={filters}
+            activeFilterCount={activeFilterCount}
+            loading={filterOptionsLoading}
+            error={filterOptionsError}
+            onToggleOption={toggleFilterOption}
+            onClearFilters={clearFilters}
+          />
 
           <main className="flex-1">
+            {activeFilterCount > 0 && (
+              <div className="mb-4 px-3 py-2 rounded-lg border border-[#E9EAEC] bg-white text-[13px] text-[#535B64]">
+                Showing results for {activeFilterCount} active filter{activeFilterCount > 1 ? 's' : ''}.
+              </div>
+            )}
+
             {loading ? (
               <div className="min-h-[320px] bg-white/70 rounded-xl border border-[#E9EAEC]" />
             ) : vendors.length === 0 ? (

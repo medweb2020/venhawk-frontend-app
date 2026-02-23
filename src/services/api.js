@@ -6,6 +6,24 @@ import { withAppLoader } from './loadingManager';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
+const buildVendorListingEndpoint = (filters = {}) => {
+  const queryParams = new URLSearchParams();
+
+  Object.entries(filters).forEach(([filterKey, values]) => {
+    if (!Array.isArray(values)) {
+      return;
+    }
+
+    values
+      .map((value) => String(value).trim())
+      .filter(Boolean)
+      .forEach((value) => queryParams.append(filterKey, value));
+  });
+
+  const queryString = queryParams.toString();
+  return queryString ? `/vendors/listing?${queryString}` : '/vendors/listing';
+};
+
 /**
  * Generic fetch wrapper with error handling
  */
@@ -198,8 +216,21 @@ export const vendorsAPI = {
    * @param {string} accessToken - Auth0 access token
    * @returns {Promise<Array>} Vendor listing cards
    */
-  getListing: async (accessToken) => {
-    return fetchAPI('/vendors/listing', {
+  getListing: async (accessToken, filters = {}) => {
+    return fetchAPI(buildVendorListingEndpoint(filters), {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  },
+
+  /**
+   * Get listing filter options
+   * @param {string} accessToken - Auth0 access token
+   * @returns {Promise<Object>} Filter groups and options
+   */
+  getListingFilters: async (accessToken) => {
+    return fetchAPI('/vendors/listing/filters', {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
