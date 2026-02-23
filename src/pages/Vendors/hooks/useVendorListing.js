@@ -21,6 +21,10 @@ const FILTER_GROUP_OPTIONS_CACHE = {
 let filterGroupsInFlightPromise = null;
 const VENDOR_LISTING_CACHE = new Map();
 const VENDOR_LISTING_IN_FLIGHT = new Map();
+const VENDOR_LISTING_UI_STATE = {
+  filters: createDefaultFilters(),
+  searchInput: '',
+};
 
 const getFiltersCacheKey = (filters) => {
   const orderedKeys = Object.keys(createDefaultFilters());
@@ -60,12 +64,18 @@ export const useVendorListing = () => {
   const [allVendors, setAllVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filters, setFilters] = useState(createDefaultFilters);
+  const [filters, setFilters] = useState(() =>
+    normalizeFilterState(VENDOR_LISTING_UI_STATE.filters),
+  );
   const [filterGroups, setFilterGroups] = useState([]);
   const [filterOptionsLoading, setFilterOptionsLoading] = useState(true);
   const [filterOptionsError, setFilterOptionsError] = useState('');
-  const [searchInput, setSearchInput] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState(
+    () => VENDOR_LISTING_UI_STATE.searchInput || '',
+  );
+  const [searchQuery, setSearchQuery] = useState(
+    () => String(VENDOR_LISTING_UI_STATE.searchInput || '').trim(),
+  );
 
   const normalizedFilters = useMemo(() => normalizeFilterState(filters), [filters]);
 
@@ -237,6 +247,14 @@ export const useVendorListing = () => {
     return () => {
       globalThis.clearTimeout(timeoutId);
     };
+  }, [searchInput]);
+
+  useEffect(() => {
+    VENDOR_LISTING_UI_STATE.filters = normalizedFilters;
+  }, [normalizedFilters]);
+
+  useEffect(() => {
+    VENDOR_LISTING_UI_STATE.searchInput = searchInput;
   }, [searchInput]);
 
   return {
