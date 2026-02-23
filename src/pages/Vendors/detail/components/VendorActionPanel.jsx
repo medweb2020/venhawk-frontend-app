@@ -31,8 +31,9 @@ const VendorActionPanel = ({ vendor }) => {
           alt={`${vendor.name} showcase`}
           name={vendor.name}
           objectFit="contain"
+          objectPosition="center"
           wrapperClassName="relative z-10 w-full h-full"
-          imgClassName="p-6 sm:p-9"
+          imgClassName="p-4 sm:p-6"
           fallbackClassName="bg-transparent"
           initialsClassName="text-[56px] sm:text-[72px] text-[#0A2540]"
         />

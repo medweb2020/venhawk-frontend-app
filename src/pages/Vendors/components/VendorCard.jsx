@@ -14,7 +14,10 @@ const VendorCard = ({ vendor }) => {
             src={vendor.logoUrl}
             alt={`${vendor.name} logo`}
             name={vendor.name}
-            wrapperClassName="w-[76px] h-[76px] rounded-full shrink-0"
+            objectFit="contain"
+            objectPosition="center"
+            wrapperClassName="w-[76px] h-[76px] rounded-[14px] shrink-0 bg-white"
+            imgClassName="p-[6px]"
             initialsClassName="text-[18px]"
           />
 

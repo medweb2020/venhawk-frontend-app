@@ -4,9 +4,23 @@ import VendorImage from '../../components/VendorImage';
 
 const formatWebsite = (websiteUrl, logoUrl) => {
   if (websiteUrl) {
-    return websiteUrl
-      .replace(/^https?:\/\//i, '')
-      .replace(/\/$/, '');
+    const withProtocol = /^https?:\/\//i.test(websiteUrl)
+      ? websiteUrl
+      : `https://${websiteUrl}`;
+
+    try {
+      const parsedUrl = new URL(withProtocol);
+      const host = parsedUrl.hostname.replace(/^www\./i, '');
+      const path = parsedUrl.pathname && parsedUrl.pathname !== '/'
+        ? parsedUrl.pathname.replace(/\/$/, '')
+        : '';
+      return `${host}${path}`;
+    } catch {
+      return websiteUrl
+        .replace(/^https?:\/\//i, '')
+        .replace(/^www\./i, '')
+        .replace(/\/$/, '');
+    }
   }
 
   if (logoUrl && logoUrl.includes('logo.clearbit.com/')) {
@@ -18,6 +32,9 @@ const formatWebsite = (websiteUrl, logoUrl) => {
 
 const VendorProfilePanel = ({ vendor }) => {
   const website = formatWebsite(vendor.websiteUrl, vendor.logoUrl);
+  const websiteHref = /^https?:\/\//i.test(vendor.websiteUrl || '')
+    ? vendor.websiteUrl
+    : `https://${website}`;
   const headquarter = vendor.headquarter || vendor.location || 'United States';
   const budgetLabel = vendor.startFrom?.toLowerCase().includes('contact')
     ? vendor.startFrom
@@ -31,7 +48,10 @@ const VendorProfilePanel = ({ vendor }) => {
             src={vendor.logoUrl}
             alt={`${vendor.name} logo`}
             name={vendor.name}
-            wrapperClassName="w-[62px] h-[62px] sm:w-[70px] sm:h-[70px] rounded-full shrink-0"
+            objectFit="contain"
+            objectPosition="center"
+            wrapperClassName="w-[62px] h-[62px] sm:w-[70px] sm:h-[70px] rounded-[12px] shrink-0 bg-white"
+            imgClassName="p-[6px]"
             initialsClassName="text-[20px] sm:text-[24px]"
           />
 
@@ -76,19 +96,35 @@ const VendorProfilePanel = ({ vendor }) => {
       </div>
 
       <div className="mt-8 sm:mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 text-[#535B64]">
-        <div className="sm:pr-4 sm:border-r sm:border-[#BEC1C5] pb-3 sm:pb-0 border-b sm:border-b-0 border-[#E9EAEC]">
+        <div className="min-w-0 sm:pr-4 sm:border-r sm:border-[#BEC1C5] pb-3 sm:pb-0 border-b sm:border-b-0 border-[#E9EAEC]">
           <p className="text-[15px] font-semibold">Website</p>
-          <p className="mt-2 text-[15px]">{website}</p>
+          <a
+            href={websiteHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 block text-[15px] text-[#697077] break-all leading-[1.25] hover:underline"
+            title={website}
+          >
+            {website}
+          </a>
         </div>
 
-        <div className="sm:px-4 sm:border-r sm:border-[#BEC1C5] pb-3 sm:pb-0 border-b sm:border-b-0 border-[#E9EAEC]">
+        <div className="min-w-0 sm:px-4 sm:border-r sm:border-[#BEC1C5] pb-3 sm:pb-0 border-b sm:border-b-0 border-[#E9EAEC]">
           <p className="text-[15px] font-semibold">Headquarter</p>
-          <p className="mt-2 text-[15px]">{headquarter}</p>
+          <p className="mt-2 text-[15px] break-words leading-[1.25]">{headquarter}</p>
         </div>
 
-        <div className="sm:pl-4">
+        <div className="min-w-0 sm:pl-4">
           <p className="text-[15px] font-semibold">Share Via</p>
-          <p className="mt-2 text-[15px]">{website}</p>
+          <a
+            href={websiteHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 block text-[15px] text-[#697077] break-all leading-[1.25] hover:underline"
+            title={website}
+          >
+            {website}
+          </a>
         </div>
       </div>
     </section>
