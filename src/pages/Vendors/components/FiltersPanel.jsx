@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
+import Checkbox from '../../../components/common/Checkbox';
 
 const FiltersPanel = ({
   filterGroups,
@@ -119,22 +120,13 @@ const FiltersPanel = ({
                           const optionId = `filter-${group.key}-${option.value}`;
 
                           return (
-                            <label
+                            <Checkbox
                               key={option.value}
-                              htmlFor={optionId}
-                              className="flex items-center gap-2.5 cursor-pointer group"
-                            >
-                              <input
-                                id={optionId}
-                                type="checkbox"
-                                checked={isChecked}
-                                onChange={() => onToggleOption(group.key, option.value)}
-                                className="h-[15px] w-[15px] shrink-0 rounded-[3px] border-[#C6CBD1] text-[#0A2540] focus:ring-[#0A2540] focus:ring-1 cursor-pointer"
-                              />
-                              <span className="text-[13px] text-[#535B64] leading-[1.4] group-hover:text-[#3D464F] transition-colors">
-                                {option.label}
-                              </span>
-                            </label>
+                              id={optionId}
+                              checked={isChecked}
+                              onChange={() => onToggleOption(group.key, option.value)}
+                              label={option.label}
+                            />
                           );
                         })}
                       </div>
