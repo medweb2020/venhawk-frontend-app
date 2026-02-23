@@ -23,20 +23,22 @@ const FiltersPanel = ({
   }, [filters]);
 
   const toggleExpanded = (groupKey) => {
-    setExpandedGroups((prev) => ({
-      ...prev,
-      [groupKey]: !prev[groupKey],
-    }));
+    setExpandedGroups((prev) => {
+      const shouldExpand = !prev[groupKey];
+      return shouldExpand ? { [groupKey]: true } : {};
+    });
   };
 
   return (
-    <aside className="w-full lg:w-[280px] shrink-0">
-      <div className="bg-white rounded-xl p-5">
-        <div className="flex items-center justify-between mb-4">
+    <aside className="w-full lg:w-[320px] xl:w-[340px] shrink-0 lg:sticky lg:top-24 self-start">
+      <div className="bg-white rounded-[18px] border border-[#DFE3E8] p-6 min-h-[640px]">
+        <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <h4 className="text-[18px] font-semibold text-[#3D464F]">Filters</h4>
+            <h4 className="text-[32px] leading-none font-bold tracking-[-0.4px] text-[#3D464F]">
+              Filters
+            </h4>
             {hasFilters && (
-              <span className="inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5 rounded-full bg-[#0A2540] text-white text-[11px] font-semibold">
+              <span className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-[#0A2540] text-white text-[11px] font-semibold">
                 {activeFilterCount}
               </span>
             )}
@@ -46,7 +48,7 @@ const FiltersPanel = ({
             type="button"
             onClick={onClearFilters}
             disabled={!hasFilters}
-            className={`text-[13px] transition-colors ${
+            className={`text-[14px] transition-colors ${
               hasFilters
                 ? 'text-[#697077] hover:text-[#3D464F]'
                 : 'text-[#C6CBD1] cursor-not-allowed'
@@ -59,7 +61,7 @@ const FiltersPanel = ({
         {loading && (
           <div className="space-y-3 pt-2">
             {Array.from({ length: 5 }).map((_, index) => (
-              <div key={index} className="h-[44px] rounded-lg bg-[#F4F5F6] animate-pulse" />
+              <div key={index} className="h-[52px] rounded-xl bg-[#F4F5F6] animate-pulse" />
             ))}
           </div>
         )}
@@ -71,26 +73,27 @@ const FiltersPanel = ({
         )}
 
         {!loading && !error && (
-          <div className="space-y-1">
-            {filterGroups.map((group, index) => {
-              const isExpanded =
-                typeof expandedGroups[group.key] === 'boolean'
-                  ? expandedGroups[group.key]
-                  : index === 0;
+          <div className="space-y-1.5">
+            {filterGroups.map((group) => {
+              const isExpanded = Boolean(expandedGroups[group.key]);
               const selectedCount = selectedCounts[group.key] || 0;
               const selectedOptions = filters[group.key] || [];
+              const expandedMaxHeight = Math.min(
+                Math.max(group.options.length * 42 + 20, 120),
+                280,
+              );
 
               return (
                 <div key={group.key}>
                   <button
                     type="button"
                     onClick={() => toggleExpanded(group.key)}
-                    className="w-full flex items-center justify-between gap-3 py-[14px] text-left"
+                    className="w-full flex items-center justify-between gap-3 text-left rounded-xl px-2 py-[14px] transition-all duration-200"
                     aria-expanded={isExpanded}
                     aria-controls={`filter-group-${group.key}`}
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-[14px] font-semibold text-[#3D464F] truncate">
+                      <span className="text-[18px] font-semibold leading-none text-[#3D464F] truncate">
                         {group.label}
                       </span>
                       {selectedCount > 0 && (
@@ -100,21 +103,33 @@ const FiltersPanel = ({
                       )}
                     </div>
 
-                    <svg
-                      className={`w-[15px] h-[15px] shrink-0 transition-transform duration-200 ${
-                        isExpanded ? 'rotate-180 text-[#E8622E]' : 'text-[#93989E]'
+                    <span
+                      className={`h-7 w-7 shrink-0 inline-flex items-center justify-center transition-all duration-300 ${
+                        isExpanded ? 'text-[#0A2540] rotate-180' : 'text-[#7A828B]'
                       }`}
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
                     >
-                      <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0L5.21 8.27a.75.75 0 0 1 .02-1.06Z" />
-                    </svg>
+                      <svg
+                        className="w-[14px] h-[14px]"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0L5.21 8.27a.75.75 0 0 1 .02-1.06Z" />
+                      </svg>
+                    </span>
                   </button>
 
-                  {isExpanded && (
-                    <div id={`filter-group-${group.key}`} className="pb-3">
-                      <div className="space-y-[10px] max-h-[200px] overflow-y-auto pr-0.5">
+                  <div
+                    id={`filter-group-${group.key}`}
+                    className="overflow-hidden transition-[max-height,opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                    style={{
+                      maxHeight: isExpanded ? `${expandedMaxHeight}px` : '0px',
+                      opacity: isExpanded ? 1 : 0,
+                      transform: isExpanded ? 'translateY(0)' : 'translateY(-6px)',
+                    }}
+                  >
+                    <div className="pt-2 pb-3 pl-2 pr-1">
+                      <div className="space-y-[10px] max-h-[220px] overflow-y-auto pr-1">
                         {group.options.map((option) => {
                           const isChecked = selectedOptions.includes(option.value);
                           const optionId = `filter-${group.key}-${option.value}`;
@@ -126,12 +141,15 @@ const FiltersPanel = ({
                               checked={isChecked}
                               onChange={() => onToggleOption(group.key, option.value)}
                               label={option.label}
+                              className="py-0.5"
+                              boxClassName="h-[16px] w-[16px] rounded-[4px]"
+                              labelClassName="text-[13px] text-[#4A5561]"
                             />
                           );
                         })}
                       </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               );
             })}
