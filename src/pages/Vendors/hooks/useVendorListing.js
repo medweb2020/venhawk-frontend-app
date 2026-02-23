@@ -1,8 +1,10 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { vendorsAPI } from '../../../services/api';
+import { searchVendors } from '../search/vendorSearchEngine';
 
 const LISTING_DEBOUNCE_MS = 180;
+const SEARCH_INPUT_DEBOUNCE_MS = 140;
 
 const createDefaultFilters = () => ({
   coreCapabilities: [],
@@ -55,13 +57,15 @@ export const useVendorListing = () => {
   const vendorsRequestRef = useRef(0);
   const filterOptionsRequestRef = useRef(0);
 
-  const [vendors, setVendors] = useState([]);
+  const [allVendors, setAllVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filters, setFilters] = useState(createDefaultFilters);
   const [filterGroups, setFilterGroups] = useState([]);
   const [filterOptionsLoading, setFilterOptionsLoading] = useState(true);
   const [filterOptionsError, setFilterOptionsError] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const normalizedFilters = useMemo(() => normalizeFilterState(filters), [filters]);
 
@@ -81,7 +85,7 @@ export const useVendorListing = () => {
     try {
       if (VENDOR_LISTING_CACHE.has(cacheKey)) {
         if (isMounted() && requestId === vendorsRequestRef.current) {
-          setVendors(VENDOR_LISTING_CACHE.get(cacheKey));
+          setAllVendors(VENDOR_LISTING_CACHE.get(cacheKey));
         }
         return;
       }
@@ -102,12 +106,12 @@ export const useVendorListing = () => {
       VENDOR_LISTING_CACHE.set(cacheKey, vendorResults);
 
       if (isMounted() && requestId === vendorsRequestRef.current) {
-        setVendors(vendorResults);
+        setAllVendors(vendorResults);
       }
     } catch (err) {
       if (isMounted() && requestId === vendorsRequestRef.current) {
         setError(err.message || 'Failed to load vendors.');
-        setVendors([]);
+        setAllVendors([]);
       }
     } finally {
       if (
@@ -190,6 +194,20 @@ export const useVendorListing = () => {
     setFilters(createDefaultFilters());
   }, []);
 
+  const clearSearch = useCallback(() => {
+    setSearchInput('');
+    setSearchQuery('');
+  }, []);
+
+  const vendors = useMemo(() => {
+    return searchVendors({
+      vendors: allVendors,
+      query: searchQuery,
+    });
+  }, [allVendors, searchQuery]);
+
+  const hasSearchQuery = searchQuery.length > 0;
+
   useEffect(() => {
     let isMounted = true;
     loadFilterOptions(() => isMounted);
@@ -211,8 +229,19 @@ export const useVendorListing = () => {
     };
   }, [loadVendors]);
 
+  useEffect(() => {
+    const timeoutId = globalThis.setTimeout(() => {
+      setSearchQuery(searchInput.trim());
+    }, SEARCH_INPUT_DEBOUNCE_MS);
+
+    return () => {
+      globalThis.clearTimeout(timeoutId);
+    };
+  }, [searchInput]);
+
   return {
     vendors,
+    allVendors,
     loading,
     error,
     filters: normalizedFilters,
@@ -222,6 +251,11 @@ export const useVendorListing = () => {
     activeFilterCount,
     toggleFilterOption,
     clearFilters,
+    searchInput,
+    searchQuery,
+    hasSearchQuery,
+    setSearchInput,
+    clearSearch,
     reload: loadVendors,
     reloadFilterOptions: loadFilterOptions,
   };
