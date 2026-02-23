@@ -2,13 +2,14 @@
  * API Service Layer
  * @description Centralized API calls for the application
  */
+import { withAppLoader } from './loadingManager';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
 /**
  * Generic fetch wrapper with error handling
  */
-const fetchAPI = async (endpoint, options = {}) => {
+const fetchAPI = async (endpoint, options = {}, loadingOptions = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
 
   const defaultOptions = {
@@ -19,7 +20,7 @@ const fetchAPI = async (endpoint, options = {}) => {
     ...options,
   };
 
-  try {
+  return withAppLoader(async () => {
     const response = await fetch(url, defaultOptions);
 
     if (!response.ok) {
@@ -32,10 +33,7 @@ const fetchAPI = async (endpoint, options = {}) => {
     }
 
     return await response.json();
-  } catch (error) {
-    console.error('API Error:', error);
-    throw error;
-  }
+  }, loadingOptions);
 };
 
 /**
@@ -127,7 +125,7 @@ export const userAPI = {
         Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(userData),
-    });
+    }, { enabled: false });
   },
 };
 

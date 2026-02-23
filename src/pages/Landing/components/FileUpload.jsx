@@ -66,7 +66,6 @@ const FileUpload = ({ fileUploads, updateProjectData }) => {
         // Remove from uploading state
         setUploadingFiles(prev => prev.filter(f => f.id !== uploadId));
       } catch (error) {
-        console.error('File upload error:', error);
         setUploadError(`Failed to upload ${file.name}: ${error.message}`);
         setUploadingFiles(prev => prev.filter(f => f.id !== uploadId));
       }
@@ -134,7 +133,6 @@ const FileUpload = ({ fileUploads, updateProjectData }) => {
         fileUploads: prevData.fileUploads.filter((_, i) => i !== index),
       }));
     } catch (error) {
-      console.error('File deletion error:', error);
       setUploadError(`Failed to delete ${fileToRemove.fileName}: ${error.message}`);
     } finally {
       // Clear deleting state

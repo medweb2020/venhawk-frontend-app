@@ -8,7 +8,6 @@ import Header from '../../components/layout/Header';
 import LeftSidebar from '../../components/layout/LeftSidebar';
 import Stepper from '../../components/common/Stepper';
 import Button from '../../components/common/Button';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 /**
  * Check if project data has required fields filled
@@ -32,8 +31,6 @@ const Summary = () => {
   const { projectData, updateProjectData } = useProject();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
-
-  console.log('Project data:', projectData);
 
   // Redirect to landing page if no project data exists
   useEffect(() => {
@@ -120,7 +117,6 @@ const Summary = () => {
 
       // Submit project and get matched vendors
       const response = await projectAPI.submitProject(apiPayload, accessToken);
-      console.log('Project submitted successfully:', response);
 
       // Store matched vendors in context
       if (response.matchedVendors) {
@@ -130,8 +126,6 @@ const Summary = () => {
       // Navigate to vendors page to display results
       navigate('/vendors');
     } catch (err) {
-      console.error('Error submitting project:', err);
-
       // Parse error message - check if it's a validation error with multiple messages
       try {
         const errorData = JSON.parse(err.message);
@@ -140,7 +134,7 @@ const Summary = () => {
         } else {
           setError([errorData.message || err.message || 'Failed to Find vendors. Please try again.']);
         }
-      } catch (parseError) {
+      } catch {
         // If error message is not JSON, treat it as a single error
         setError([err.message || 'Failed to Find vendors. Please try again.']);
       }
@@ -152,15 +146,6 @@ const Summary = () => {
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <Header />
-
-      {/* Full screen loading spinner */}
-      {isSubmitting && (
-        <LoadingSpinner
-          fullScreen
-          size="large"
-          message="Submitting your project..."
-        />
-      )}
 
       <div className="flex-1 bg-gray-100 overflow-auto">
         <div className="relative min-h-full flex flex-col lg:flex-row">

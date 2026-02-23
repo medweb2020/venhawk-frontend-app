@@ -31,9 +31,7 @@ export const useUserSync = () => {
         };
 
         await userAPI.syncUser(userData, accessToken);
-        console.log('User synced successfully');
       } catch (error) {
-        console.error('Failed to sync user:', error);
         setSyncError(error.message || 'Failed to sync user data');
       } finally {
         setIsSyncing(false);

@@ -28,9 +28,7 @@ const Vendors = () => {
 
           <main className="flex-1">
             {loading ? (
-              <div className="flex items-center justify-center min-h-[320px] bg-white rounded-xl border border-[#E9EAEC]">
-                <p className="text-[14px] font-medium text-[#697077]">Loading vendors...</p>
-              </div>
+              <div className="min-h-[320px] bg-white/70 rounded-xl border border-[#E9EAEC]" />
             ) : vendors.length === 0 ? (
               <EmptyState />
             ) : (

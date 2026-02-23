@@ -64,7 +64,6 @@ const Landing = () => {
 
   const handleSubmit = () => {
     if (isFormValid()) {
-      console.log('Page 1 Data:', formData);
       // Navigate to Timeline & Budget page
       navigate('/budget-timeline');
     }

@@ -164,7 +164,6 @@ const BudgetTimeline = () => {
 
   const handleNext = () => {
     if (validateForm()) {
-      console.log('Page 2 Data:', formData);
       navigate('/summary');
     }
   };

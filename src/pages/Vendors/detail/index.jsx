@@ -28,9 +28,7 @@ const VendorDetail = () => {
         <GoBackButton onClick={handleBack} />
 
         {loading ? (
-          <div className="mt-10 rounded-[12px] border border-[#E9EAEC] bg-white py-16 text-center text-[#697077]">
-            Loading vendor details...
-          </div>
+          <div className="mt-10 rounded-[12px] border border-[#E9EAEC] bg-white/70 py-16" />
         ) : error ? (
           <div className="mt-10 rounded-[12px] border border-red-200 bg-red-50 p-6 text-red-700">
             {error}
