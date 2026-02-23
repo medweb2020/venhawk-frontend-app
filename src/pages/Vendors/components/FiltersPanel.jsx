@@ -29,13 +29,13 @@ const FiltersPanel = ({
   };
 
   return (
-    <aside className="w-full lg:w-[324px] shrink-0">
-      <div className="bg-white border border-[#E9EAEC] rounded-xl p-6">
-        <div className="flex items-center justify-between mb-5">
+    <aside className="w-full lg:w-[280px] shrink-0">
+      <div className="bg-white rounded-xl p-5">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <h4 className="text-[20px] font-semibold text-[#3D464F]">Filters</h4>
+            <h4 className="text-[18px] font-semibold text-[#3D464F]">Filters</h4>
             {hasFilters && (
-              <span className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-[#0A2540] text-white text-[11px] font-semibold">
+              <span className="inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5 rounded-full bg-[#0A2540] text-white text-[11px] font-semibold">
                 {activeFilterCount}
               </span>
             )}
@@ -45,10 +45,10 @@ const FiltersPanel = ({
             type="button"
             onClick={onClearFilters}
             disabled={!hasFilters}
-            className={`text-[14px] transition-colors ${
+            className={`text-[13px] transition-colors ${
               hasFilters
                 ? 'text-[#697077] hover:text-[#3D464F]'
-                : 'text-[#B8BDC3] cursor-not-allowed'
+                : 'text-[#C6CBD1] cursor-not-allowed'
             }`}
           >
             Clear filters
@@ -56,21 +56,21 @@ const FiltersPanel = ({
         </div>
 
         {loading && (
-          <div className="space-y-3">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="h-10 rounded-lg bg-[#F4F5F6] animate-pulse" />
+          <div className="space-y-3 pt-2">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div key={index} className="h-[44px] rounded-lg bg-[#F4F5F6] animate-pulse" />
             ))}
           </div>
         )}
 
         {!loading && error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-700 mb-4">
+          <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-700">
             {error}
           </div>
         )}
 
         {!loading && !error && (
-          <div className="space-y-3">
+          <div className="space-y-1">
             {filterGroups.map((group, index) => {
               const isExpanded =
                 typeof expandedGroups[group.key] === 'boolean'
@@ -80,11 +80,11 @@ const FiltersPanel = ({
               const selectedOptions = filters[group.key] || [];
 
               return (
-                <div key={group.key} className="rounded-lg border border-[#E9EAEC]">
+                <div key={group.key}>
                   <button
                     type="button"
                     onClick={() => toggleExpanded(group.key)}
-                    className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left"
+                    className="w-full flex items-center justify-between gap-3 py-[14px] text-left"
                     aria-expanded={isExpanded}
                     aria-controls={`filter-group-${group.key}`}
                   >
@@ -93,14 +93,16 @@ const FiltersPanel = ({
                         {group.label}
                       </span>
                       {selectedCount > 0 && (
-                        <span className="inline-flex items-center justify-center min-w-[20px] h-[20px] rounded-full bg-[#EEF3F8] text-[#0A2540] text-[11px] font-semibold px-1.5">
+                        <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-[#EEF3F8] text-[#0A2540] text-[10px] font-semibold px-1">
                           {selectedCount}
                         </span>
                       )}
                     </div>
 
                     <svg
-                      className={`w-4 h-4 text-[#93989E] transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                      className={`w-[15px] h-[15px] shrink-0 transition-transform duration-200 ${
+                        isExpanded ? 'rotate-180 text-[#E8622E]' : 'text-[#93989E]'
+                      }`}
                       viewBox="0 0 20 20"
                       fill="currentColor"
                       aria-hidden="true"
@@ -110,8 +112,8 @@ const FiltersPanel = ({
                   </button>
 
                   {isExpanded && (
-                    <div id={`filter-group-${group.key}`} className="border-t border-[#E9EAEC] px-4 py-3">
-                      <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                    <div id={`filter-group-${group.key}`} className="pb-3">
+                      <div className="space-y-[10px] max-h-[200px] overflow-y-auto pr-0.5">
                         {group.options.map((option) => {
                           const isChecked = selectedOptions.includes(option.value);
                           const optionId = `filter-${group.key}-${option.value}`;
@@ -120,16 +122,18 @@ const FiltersPanel = ({
                             <label
                               key={option.value}
                               htmlFor={optionId}
-                              className="flex items-start gap-2 cursor-pointer text-[13px] text-[#535B64] leading-5"
+                              className="flex items-center gap-2.5 cursor-pointer group"
                             >
                               <input
                                 id={optionId}
                                 type="checkbox"
                                 checked={isChecked}
                                 onChange={() => onToggleOption(group.key, option.value)}
-                                className="mt-0.5 h-4 w-4 rounded border-[#C6CBD1] text-[#0A2540] focus:ring-[#0A2540]"
+                                className="h-[15px] w-[15px] shrink-0 rounded-[3px] border-[#C6CBD1] text-[#0A2540] focus:ring-[#0A2540] focus:ring-1 cursor-pointer"
                               />
-                              <span>{option.label}</span>
+                              <span className="text-[13px] text-[#535B64] leading-[1.4] group-hover:text-[#3D464F] transition-colors">
+                                {option.label}
+                              </span>
                             </label>
                           );
                         })}
