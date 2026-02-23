@@ -25,6 +25,7 @@ const VendorImage = ({
   fallbackClassName = '',
   initialsClassName = '',
   objectFit = 'cover',
+  objectPosition = 'center',
   fallbackText,
   loading = 'lazy',
 }) => {
@@ -44,7 +45,7 @@ const VendorImage = ({
           src={src}
           alt={alt || `${name || 'Vendor'} image`}
           className={`w-full h-full ${imgClassName}`}
-          style={{ objectFit }}
+          style={{ objectFit, objectPosition }}
           referrerPolicy="no-referrer"
           loading={loading}
           onError={() => setHasError(true)}
