@@ -56,7 +56,7 @@ const VenAISearchBanner = ({
       <div className="absolute inset-0 bg-[linear-gradient(90deg,#0A2540_0%,#23364B_45%,#5A4C57_65%,#0A2540_100%)]" />
       <div className="relative px-6 py-7 md:px-10 md:py-8 flex flex-col gap-4">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <h2 className="text-[#FCFCFC] text-[28px] md:text-[44px] leading-[1.15] font-bold tracking-[-0.4px]">
+          <h2 className="text-[#FCFCFC] text-[25px] md:text-[38px] leading-[1.15] font-bold tracking-[-0.3px]">
             Let Ven AI find a perfect match for you!
           </h2>
 
