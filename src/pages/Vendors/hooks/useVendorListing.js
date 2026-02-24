@@ -1,6 +1,6 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { vendorsAPI } from '../../../services/api';
+import { projectAPI, vendorsAPI } from '../../../services/api';
 import { searchVendors } from '../search/vendorSearchEngine';
 
 const LISTING_DEBOUNCE_MS = 180;
@@ -21,6 +21,9 @@ const FILTER_GROUP_OPTIONS_CACHE = {
 let filterGroupsInFlightPromise = null;
 const VENDOR_LISTING_CACHE = new Map();
 const VENDOR_LISTING_IN_FLIGHT = new Map();
+const PROJECT_RECOMMENDATIONS_CACHE = new Map();
+const PROJECT_RECOMMENDATIONS_IN_FLIGHT = new Map();
+const PROJECT_RECOMMENDATIONS_CACHE_TTL_MS = 60 * 1000;
 const VENDOR_LISTING_UI_STATE = {
   filters: createDefaultFilters(),
   searchInput: '',
@@ -56,14 +59,30 @@ const normalizeFilterState = (filters) => {
   }, createDefaultFilters());
 };
 
-export const useVendorListing = () => {
+const normalizeProjectId = (projectId) => {
+  const parsed = Number(projectId);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return null;
+  }
+
+  return parsed;
+};
+
+export const useVendorListing = ({ projectId } = {}) => {
   const { getAccessTokenSilently } = useAuth0();
   const vendorsRequestRef = useRef(0);
   const filterOptionsRequestRef = useRef(0);
 
+  const normalizedProjectId = useMemo(
+    () => normalizeProjectId(projectId),
+    [projectId],
+  );
+  const isProjectRecommendationMode = Boolean(normalizedProjectId);
+
   const [allVendors, setAllVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [recommendationsMeta, setRecommendationsMeta] = useState(null);
   const [filters, setFilters] = useState(() =>
     normalizeFilterState(VENDOR_LISTING_UI_STATE.filters),
   );
@@ -77,30 +96,103 @@ export const useVendorListing = () => {
     () => String(VENDOR_LISTING_UI_STATE.searchInput || '').trim(),
   );
 
-  const normalizedFilters = useMemo(() => normalizeFilterState(filters), [filters]);
-
-  const activeFilterCount = useMemo(
-    () => Object.values(normalizedFilters).reduce((count, values) => count + values.length, 0),
-    [normalizedFilters],
+  const normalizedFilters = useMemo(
+    () => normalizeFilterState(filters),
+    [filters],
   );
+
+  const activeFilterCount = useMemo(() => {
+    return Object.values(normalizedFilters).reduce(
+      (count, values) => count + values.length,
+      0,
+    );
+  }, [normalizedFilters]);
 
   const loadVendors = useCallback(async (isMounted = () => true) => {
     const requestId = ++vendorsRequestRef.current;
-    const cacheKey = getFiltersCacheKey(normalizedFilters);
-    let requestPromise;
-
     setLoading(true);
     setError('');
 
     try {
-      if (VENDOR_LISTING_CACHE.has(cacheKey)) {
-        if (isMounted() && requestId === vendorsRequestRef.current) {
-          setAllVendors(VENDOR_LISTING_CACHE.get(cacheKey));
+      if (isProjectRecommendationMode && normalizedProjectId) {
+        const projectFilterKey = getFiltersCacheKey(normalizedFilters);
+        const cacheKey = `project:${normalizedProjectId};filters:${projectFilterKey}`;
+        let requestPromise;
+
+        if (PROJECT_RECOMMENDATIONS_CACHE.has(cacheKey)) {
+          const cached = PROJECT_RECOMMENDATIONS_CACHE.get(cacheKey);
+          const isFresh =
+            Date.now() - Number(cached?.cachedAt || 0) <
+            PROJECT_RECOMMENDATIONS_CACHE_TTL_MS;
+
+          if (!isFresh) {
+            PROJECT_RECOMMENDATIONS_CACHE.delete(cacheKey);
+          } else {
+            if (isMounted() && requestId === vendorsRequestRef.current) {
+              setAllVendors(cached.vendors);
+              setRecommendationsMeta(cached.meta);
+            }
+            return;
+          }
         }
+
+        requestPromise = PROJECT_RECOMMENDATIONS_IN_FLIGHT.get(cacheKey);
+
+        if (!requestPromise) {
+          requestPromise = (async () => {
+            const accessToken = await getAccessTokenSilently();
+            const response = await projectAPI.getRecommendations(
+              normalizedProjectId,
+              accessToken,
+              normalizedFilters,
+            );
+
+            return {
+              vendors: Array.isArray(response?.recommendedVendors)
+                ? response.recommendedVendors
+                : [],
+              meta: {
+                projectId: response?.projectId || normalizedProjectId,
+                scoringVersion: response?.scoringVersion || 'v1',
+                computedAt: response?.computedAt || null,
+                totalRecommended: Number(response?.totalRecommended || 0),
+              },
+            };
+          })();
+
+          PROJECT_RECOMMENDATIONS_IN_FLIGHT.set(cacheKey, requestPromise);
+        }
+
+        const recommendationResult = await requestPromise;
+        PROJECT_RECOMMENDATIONS_CACHE.set(cacheKey, {
+          ...recommendationResult,
+          cachedAt: Date.now(),
+        });
+
+        if (isMounted() && requestId === vendorsRequestRef.current) {
+          setAllVendors(recommendationResult.vendors);
+          setRecommendationsMeta(recommendationResult.meta);
+        }
+
+        if (
+          PROJECT_RECOMMENDATIONS_IN_FLIGHT.get(cacheKey) === requestPromise
+        ) {
+          PROJECT_RECOMMENDATIONS_IN_FLIGHT.delete(cacheKey);
+        }
+
         return;
       }
 
-      requestPromise = VENDOR_LISTING_IN_FLIGHT.get(cacheKey);
+      const cacheKey = getFiltersCacheKey(normalizedFilters);
+      let requestPromise = VENDOR_LISTING_IN_FLIGHT.get(cacheKey);
+
+      if (VENDOR_LISTING_CACHE.has(cacheKey)) {
+        if (isMounted() && requestId === vendorsRequestRef.current) {
+          setAllVendors(VENDOR_LISTING_CACHE.get(cacheKey));
+          setRecommendationsMeta(null);
+        }
+        return;
+      }
 
       if (!requestPromise) {
         requestPromise = (async () => {
@@ -117,25 +209,38 @@ export const useVendorListing = () => {
 
       if (isMounted() && requestId === vendorsRequestRef.current) {
         setAllVendors(vendorResults);
+        setRecommendationsMeta(null);
+      }
+
+      if (VENDOR_LISTING_IN_FLIGHT.get(cacheKey) === requestPromise) {
+        VENDOR_LISTING_IN_FLIGHT.delete(cacheKey);
       }
     } catch (err) {
+      if (isProjectRecommendationMode && normalizedProjectId) {
+        const projectFilterKey = getFiltersCacheKey(normalizedFilters);
+        PROJECT_RECOMMENDATIONS_IN_FLIGHT.delete(
+          `project:${normalizedProjectId};filters:${projectFilterKey}`,
+        );
+      } else {
+        VENDOR_LISTING_IN_FLIGHT.delete(getFiltersCacheKey(normalizedFilters));
+      }
+
       if (isMounted() && requestId === vendorsRequestRef.current) {
         setError(err.message || 'Failed to load vendors.');
         setAllVendors([]);
+        setRecommendationsMeta(null);
       }
     } finally {
-      if (
-        requestPromise &&
-        VENDOR_LISTING_IN_FLIGHT.get(cacheKey) === requestPromise
-      ) {
-        VENDOR_LISTING_IN_FLIGHT.delete(cacheKey);
-      }
-
       if (isMounted() && requestId === vendorsRequestRef.current) {
         setLoading(false);
       }
     }
-  }, [getAccessTokenSilently, normalizedFilters]);
+  }, [
+    getAccessTokenSilently,
+    isProjectRecommendationMode,
+    normalizedFilters,
+    normalizedProjectId,
+  ]);
 
   const loadFilterOptions = useCallback(async (isMounted = () => true) => {
     const requestId = ++filterOptionsRequestRef.current;
@@ -262,6 +367,9 @@ export const useVendorListing = () => {
     allVendors,
     loading,
     error,
+    isProjectRecommendationMode,
+    projectId: normalizedProjectId,
+    recommendationsMeta,
     filters: normalizedFilters,
     filterGroups,
     filterOptionsLoading,

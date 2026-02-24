@@ -5,6 +5,14 @@ import VendorImage from './VendorImage';
 
 const VendorCard = ({ vendor }) => {
   const detailPath = `/vendors/${vendor.vendorId || vendor.id}`;
+  const normalizedMatchingScore = Number(vendor?.matchingScore);
+  const hasMatchingScore =
+    vendor?.matchingScore !== null &&
+    vendor?.matchingScore !== undefined &&
+    Number.isFinite(normalizedMatchingScore);
+  const matchingScoreLabel = hasMatchingScore
+    ? `${Math.max(0, Math.min(100, Math.round(normalizedMatchingScore)))}% Match`
+    : null;
 
   return (
     <Link to={detailPath} className="block group cursor-pointer">
@@ -22,14 +30,22 @@ const VendorCard = ({ vendor }) => {
           />
 
           <div className="min-w-0 flex-1 relative">
-            <h3 className="text-[14px] font-semibold text-[#3D464F] truncate pr-16">{vendor.name}</h3>
+            <h3 className="text-[14px] font-semibold text-[#3D464F] truncate pr-28">{vendor.name}</h3>
             <div className="flex items-center gap-2 mt-1 mb-2 text-[12px]">
               <span className="font-medium text-[#535B64] truncate">{vendor.category}</span>
               <span className="w-[7px] h-[7px] rounded-full bg-[#D9D9D9] shrink-0" />
               <span className="font-medium text-[#3D464F] truncate">{vendor.location}</span>
             </div>
             <StarRating rating={vendor.rating} idPrefix={`vendor-${vendor.id}`} />
-            <TierBadge tier={vendor.tier} className="absolute top-[-4px] right-[-4px]" />
+
+            <div className="absolute top-[-4px] right-[-4px] flex flex-col items-end gap-1">
+              <TierBadge tier={vendor.tier} />
+              {hasMatchingScore && (
+                <span className="inline-flex h-[18px] items-center rounded-full border border-[#D8DEE5] bg-white px-[8px] text-[10px] font-semibold text-[#0A2540] shadow-[0_0_4px_0_rgba(10,37,64,0.07)]">
+                  {matchingScoreLabel}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
