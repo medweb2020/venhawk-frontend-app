@@ -26,6 +26,7 @@ const VENDOR_LISTING_UI_STATE = {
   filters: createDefaultFilters(),
   searchInput: '',
   expandedFilterGroupKey: null,
+  projectScopeKey: null,
 };
 
 const getFiltersCacheKey = (filters) => {
@@ -77,6 +78,10 @@ export const useVendorListing = ({ projectId } = {}) => {
     [projectId],
   );
   const isProjectRecommendationMode = Boolean(normalizedProjectId);
+  const projectScopeKey = useMemo(
+    () => `project:${normalizedProjectId || 'none'}`,
+    [normalizedProjectId],
+  );
 
   const [allVendors, setAllVendors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -91,6 +96,7 @@ export const useVendorListing = ({ projectId } = {}) => {
   const [expandedFilterGroupKey, setExpandedFilterGroupKey] = useState(
     () => VENDOR_LISTING_UI_STATE.expandedFilterGroupKey || null,
   );
+  const projectScopeKeyRef = useRef(VENDOR_LISTING_UI_STATE.projectScopeKey);
   const [searchInput, setSearchInput] = useState(
     () => VENDOR_LISTING_UI_STATE.searchInput || '',
   );
@@ -116,6 +122,14 @@ export const useVendorListing = ({ projectId } = {}) => {
     setError('');
 
     try {
+      if (projectScopeKeyRef.current !== projectScopeKey) {
+        if (isMounted() && requestId === vendorsRequestRef.current) {
+          setAllVendors([]);
+          setRecommendationsMeta(null);
+        }
+        return;
+      }
+
       if (!isProjectRecommendationMode || !normalizedProjectId) {
         if (isMounted() && requestId === vendorsRequestRef.current) {
           setAllVendors([]);
@@ -211,6 +225,7 @@ export const useVendorListing = ({ projectId } = {}) => {
     isProjectRecommendationMode,
     normalizedFilters,
     normalizedProjectId,
+    projectScopeKey,
   ]);
 
   const loadFilterOptions = useCallback(async (isMounted = () => true) => {
@@ -342,6 +357,30 @@ export const useVendorListing = ({ projectId } = {}) => {
   useEffect(() => {
     VENDOR_LISTING_UI_STATE.searchInput = searchInput;
   }, [searchInput]);
+
+  useEffect(() => {
+    const previousScope = projectScopeKeyRef.current;
+    if (!previousScope) {
+      projectScopeKeyRef.current = projectScopeKey;
+      VENDOR_LISTING_UI_STATE.projectScopeKey = projectScopeKey;
+      return;
+    }
+
+    if (previousScope === projectScopeKey) {
+      return;
+    }
+
+    projectScopeKeyRef.current = projectScopeKey;
+    VENDOR_LISTING_UI_STATE.projectScopeKey = projectScopeKey;
+    VENDOR_LISTING_UI_STATE.filters = createDefaultFilters();
+    VENDOR_LISTING_UI_STATE.searchInput = '';
+    VENDOR_LISTING_UI_STATE.expandedFilterGroupKey = null;
+
+    setFilters(createDefaultFilters());
+    setSearchInput('');
+    setSearchQuery('');
+    setExpandedFilterGroupKey(null);
+  }, [projectScopeKey]);
 
   useEffect(() => {
     VENDOR_LISTING_UI_STATE.expandedFilterGroupKey = expandedFilterGroupKey;
