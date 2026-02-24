@@ -6,6 +6,7 @@ import LeftSidebar from '../../components/layout/LeftSidebar';
 import Stepper from '../../components/common/Stepper';
 import Input from '../../components/common/Input';
 import DatePicker from '../../components/common/DatePicker';
+import Checkbox from '../../components/common/Checkbox';
 import Button from '../../components/common/Button';
 
 /**
@@ -231,21 +232,16 @@ const BudgetTimeline = () => {
                   </div>
 
                   {/* Flexible Dates Toggle */}
-                  <div className="flex items-center">
-                    <input
+                  <div>
+                    <Checkbox
                       id="flexibleDates"
                       name="flexibleDates"
-                      type="checkbox"
                       checked={formData.flexibleDates}
                       onChange={(e) => handleChange('flexibleDates', e.target.checked)}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                      label="I'm flexible on these dates"
+                      className="gap-3"
+                      labelClassName="text-sm font-normal text-gray-700"
                     />
-                    <label
-                      htmlFor="flexibleDates"
-                      className="ml-3 text-sm font-normal text-gray-700"
-                    >
-                      I'm flexible on these dates
-                    </label>
                   </div>
 
                   {/* Budget Type */}
