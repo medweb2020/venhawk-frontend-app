@@ -3,8 +3,11 @@ import StarRating from './StarRating';
 import TierBadge from './TierBadge';
 import VendorImage from './VendorImage';
 
-const VendorCard = ({ vendor }) => {
-  const detailPath = `/vendors/${vendor.vendorId || vendor.id}`;
+const VendorCard = ({ vendor, projectId }) => {
+  const vendorIdentifier = vendor.vendorId || vendor.id;
+  const detailPath = projectId
+    ? `/vendors/${vendorIdentifier}?projectId=${encodeURIComponent(projectId)}`
+    : `/vendors/${vendorIdentifier}`;
   const normalizedMatchingScore = Number(vendor?.matchingScore);
   const hasMatchingScore =
     vendor?.matchingScore !== null &&

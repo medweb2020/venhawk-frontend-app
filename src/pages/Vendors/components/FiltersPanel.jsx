@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import Checkbox from '../../../components/common/Checkbox';
 
@@ -10,9 +10,9 @@ const FiltersPanel = ({
   error,
   onToggleOption,
   onClearFilters,
+  expandedGroupKey,
+  onToggleExpandedGroup,
 }) => {
-  const [expandedGroups, setExpandedGroups] = useState({});
-
   const hasFilters = activeFilterCount > 0;
 
   const selectedCounts = useMemo(() => {
@@ -21,13 +21,6 @@ const FiltersPanel = ({
       return acc;
     }, {});
   }, [filters]);
-
-  const toggleExpanded = (groupKey) => {
-    setExpandedGroups((prev) => {
-      const shouldExpand = !prev[groupKey];
-      return shouldExpand ? { [groupKey]: true } : {};
-    });
-  };
 
   return (
     <aside className="w-full lg:w-[320px] xl:w-[340px] shrink-0 lg:sticky lg:top-24 self-start">
@@ -75,7 +68,7 @@ const FiltersPanel = ({
         {!loading && !error && (
           <div className="space-y-1.5">
             {filterGroups.map((group) => {
-              const isExpanded = Boolean(expandedGroups[group.key]);
+              const isExpanded = expandedGroupKey === group.key;
               const selectedCount = selectedCounts[group.key] || 0;
               const selectedOptions = filters[group.key] || [];
               const expandedMaxHeight = Math.min(
@@ -87,7 +80,7 @@ const FiltersPanel = ({
                 <div key={group.key}>
                   <button
                     type="button"
-                    onClick={() => toggleExpanded(group.key)}
+                    onClick={() => onToggleExpandedGroup(group.key)}
                     className="w-full flex items-center justify-between gap-3 text-left rounded-xl px-2 py-[14px] transition-all duration-200"
                     aria-expanded={isExpanded}
                     aria-controls={`filter-group-${group.key}`}
@@ -179,11 +172,14 @@ FiltersPanel.propTypes = {
   error: PropTypes.string,
   onToggleOption: PropTypes.func.isRequired,
   onClearFilters: PropTypes.func.isRequired,
+  expandedGroupKey: PropTypes.string,
+  onToggleExpandedGroup: PropTypes.func.isRequired,
 };
 
 FiltersPanel.defaultProps = {
   loading: false,
   error: '',
+  expandedGroupKey: null,
 };
 
 export default FiltersPanel;

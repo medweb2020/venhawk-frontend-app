@@ -1,4 +1,4 @@
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useProject } from '../../context/ProjectContext';
 import Header from '../../components/layout/Header';
 import EmptyState from './components/EmptyState';
@@ -8,6 +8,7 @@ import VenAISearchBanner from './components/VenAISearchBanner';
 import { useVendorListing } from './hooks/useVendorListing';
 
 const Vendors = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { projectData } = useProject();
 
@@ -16,10 +17,9 @@ const Vendors = () => {
 
   const {
     vendors,
-    allVendors,
     loading,
     error,
-    isProjectRecommendationMode,
+    projectId,
     filters,
     filterGroups,
     filterOptionsLoading,
@@ -27,11 +27,11 @@ const Vendors = () => {
     activeFilterCount,
     toggleFilterOption,
     clearFilters,
+    expandedFilterGroupKey,
+    setExpandedGroup,
   } = useVendorListing({ projectId: requestedProjectId });
 
-  const totalCount = allVendors.length;
-  const hasActiveConstraints = activeFilterCount > 0;
-  const resultSummary = `Showing ${vendors.length} of ${totalCount} vendor${totalCount === 1 ? '' : 's'} with ${activeFilterCount} active filter${activeFilterCount === 1 ? '' : 's'}.`;
+  const hasProjectContext = Boolean(projectId);
 
   return (
     <div className="min-h-screen bg-[#F9F7F7]">
@@ -39,7 +39,7 @@ const Vendors = () => {
 
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <h1 className="text-[32px] font-bold text-[#3D464F] mb-6">
-          {isProjectRecommendationMode ? 'Project Recommendations' : 'Procurement'}
+          Project Recommendations
         </h1>
 
         <VenAISearchBanner />
@@ -50,61 +50,55 @@ const Vendors = () => {
           </div>
         )}
 
-        <div className="flex flex-col lg:flex-row gap-6">
-          <FiltersPanel
-            filterGroups={filterGroups}
-            filters={filters}
-            activeFilterCount={activeFilterCount}
-            loading={filterOptionsLoading}
-            error={filterOptionsError}
-            onToggleOption={toggleFilterOption}
-            onClearFilters={clearFilters}
+        {!hasProjectContext ? (
+          <EmptyState
+            title="No project selected"
+            description="Create a project and click Find Vendors to view matched recommendations."
+            actionLabel="Create project"
+            onAction={() => navigate('/')}
           />
+        ) : (
+          <div className="flex flex-col lg:flex-row gap-6">
+            <FiltersPanel
+              filterGroups={filterGroups}
+              filters={filters}
+              activeFilterCount={activeFilterCount}
+              loading={filterOptionsLoading}
+              error={filterOptionsError}
+              onToggleOption={toggleFilterOption}
+              onClearFilters={clearFilters}
+              expandedGroupKey={expandedFilterGroupKey}
+              onToggleExpandedGroup={setExpandedGroup}
+            />
 
-          <main className="flex-1">
-            {hasActiveConstraints && (
-              <div className="mb-4 rounded-lg border border-[#E9EAEC] bg-white px-3 py-2.5 text-[13px] text-[#535B64] flex flex-wrap items-center gap-2 justify-between">
-                <p>{resultSummary}</p>
-                <div className="flex items-center gap-2">
-                  {activeFilterCount > 0 && (
-                    <button
-                      type="button"
-                      onClick={clearFilters}
-                      className="h-[28px] px-3 rounded-md border border-[#D7DDE4] text-[#46505A] hover:bg-[#F5F6F8] transition-colors"
-                    >
-                      Clear filters
-                    </button>
-                  )}
+            <main className="flex-1">
+              {loading ? (
+                <div className="min-h-[320px] bg-white/70 rounded-xl border border-[#E9EAEC]" />
+              ) : vendors.length === 0 ? (
+                <EmptyState
+                  title="No vendors found"
+                  description="No recommended vendors were generated for this project."
+                  actionLabel={
+                    activeFilterCount > 0 ? 'Clear filters' : ''
+                  }
+                  onAction={
+                    activeFilterCount > 0 ? clearFilters : undefined
+                  }
+                />
+              ) : (
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                  {vendors.map((vendor) => (
+                    <VendorCard
+                      key={vendor.vendorId || vendor.id}
+                      vendor={vendor}
+                      projectId={projectId}
+                    />
+                  ))}
                 </div>
-              </div>
-            )}
-
-            {loading ? (
-              <div className="min-h-[320px] bg-white/70 rounded-xl border border-[#E9EAEC]" />
-            ) : vendors.length === 0 ? (
-              <EmptyState
-                title="No vendors found"
-                description={
-                  isProjectRecommendationMode
-                    ? 'No recommended vendors were generated for this project.'
-                    : 'Try adjusting your filters.'
-                }
-                actionLabel={
-                  activeFilterCount > 0 ? 'Clear filters' : ''
-                }
-                onAction={
-                  activeFilterCount > 0 ? clearFilters : undefined
-                }
-              />
-            ) : (
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                {vendors.map((vendor) => (
-                  <VendorCard key={vendor.vendorId || vendor.id} vendor={vendor} />
-                ))}
-              </div>
-            )}
-          </main>
-        </div>
+              )}
+            </main>
+          </div>
+        )}
       </div>
     </div>
   );

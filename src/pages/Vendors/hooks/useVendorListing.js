@@ -19,14 +19,13 @@ const FILTER_GROUP_OPTIONS_CACHE = {
 };
 
 let filterGroupsInFlightPromise = null;
-const VENDOR_LISTING_CACHE = new Map();
-const VENDOR_LISTING_IN_FLIGHT = new Map();
 const PROJECT_RECOMMENDATIONS_CACHE = new Map();
 const PROJECT_RECOMMENDATIONS_IN_FLIGHT = new Map();
 const PROJECT_RECOMMENDATIONS_CACHE_TTL_MS = 60 * 1000;
 const VENDOR_LISTING_UI_STATE = {
   filters: createDefaultFilters(),
   searchInput: '',
+  expandedFilterGroupKey: null,
 };
 
 const getFiltersCacheKey = (filters) => {
@@ -89,6 +88,9 @@ export const useVendorListing = ({ projectId } = {}) => {
   const [filterGroups, setFilterGroups] = useState([]);
   const [filterOptionsLoading, setFilterOptionsLoading] = useState(true);
   const [filterOptionsError, setFilterOptionsError] = useState('');
+  const [expandedFilterGroupKey, setExpandedFilterGroupKey] = useState(
+    () => VENDOR_LISTING_UI_STATE.expandedFilterGroupKey || null,
+  );
   const [searchInput, setSearchInput] = useState(
     () => VENDOR_LISTING_UI_STATE.searchInput || '',
   );
@@ -114,115 +116,84 @@ export const useVendorListing = ({ projectId } = {}) => {
     setError('');
 
     try {
-      if (isProjectRecommendationMode && normalizedProjectId) {
-        const projectFilterKey = getFiltersCacheKey(normalizedFilters);
-        const cacheKey = `project:${normalizedProjectId};filters:${projectFilterKey}`;
-        let requestPromise;
-
-        if (PROJECT_RECOMMENDATIONS_CACHE.has(cacheKey)) {
-          const cached = PROJECT_RECOMMENDATIONS_CACHE.get(cacheKey);
-          const isFresh =
-            Date.now() - Number(cached?.cachedAt || 0) <
-            PROJECT_RECOMMENDATIONS_CACHE_TTL_MS;
-
-          if (!isFresh) {
-            PROJECT_RECOMMENDATIONS_CACHE.delete(cacheKey);
-          } else {
-            if (isMounted() && requestId === vendorsRequestRef.current) {
-              setAllVendors(cached.vendors);
-              setRecommendationsMeta(cached.meta);
-            }
-            return;
-          }
-        }
-
-        requestPromise = PROJECT_RECOMMENDATIONS_IN_FLIGHT.get(cacheKey);
-
-        if (!requestPromise) {
-          requestPromise = (async () => {
-            const accessToken = await getAccessTokenSilently();
-            const response = await projectAPI.getRecommendations(
-              normalizedProjectId,
-              accessToken,
-              normalizedFilters,
-            );
-
-            return {
-              vendors: Array.isArray(response?.recommendedVendors)
-                ? response.recommendedVendors
-                : [],
-              meta: {
-                projectId: response?.projectId || normalizedProjectId,
-                scoringVersion: response?.scoringVersion || 'v1',
-                computedAt: response?.computedAt || null,
-                totalRecommended: Number(response?.totalRecommended || 0),
-              },
-            };
-          })();
-
-          PROJECT_RECOMMENDATIONS_IN_FLIGHT.set(cacheKey, requestPromise);
-        }
-
-        const recommendationResult = await requestPromise;
-        PROJECT_RECOMMENDATIONS_CACHE.set(cacheKey, {
-          ...recommendationResult,
-          cachedAt: Date.now(),
-        });
-
+      if (!isProjectRecommendationMode || !normalizedProjectId) {
         if (isMounted() && requestId === vendorsRequestRef.current) {
-          setAllVendors(recommendationResult.vendors);
-          setRecommendationsMeta(recommendationResult.meta);
-        }
-
-        if (
-          PROJECT_RECOMMENDATIONS_IN_FLIGHT.get(cacheKey) === requestPromise
-        ) {
-          PROJECT_RECOMMENDATIONS_IN_FLIGHT.delete(cacheKey);
-        }
-
-        return;
-      }
-
-      const cacheKey = getFiltersCacheKey(normalizedFilters);
-      let requestPromise = VENDOR_LISTING_IN_FLIGHT.get(cacheKey);
-
-      if (VENDOR_LISTING_CACHE.has(cacheKey)) {
-        if (isMounted() && requestId === vendorsRequestRef.current) {
-          setAllVendors(VENDOR_LISTING_CACHE.get(cacheKey));
+          setAllVendors([]);
           setRecommendationsMeta(null);
         }
         return;
       }
 
+      const projectFilterKey = getFiltersCacheKey(normalizedFilters);
+      const cacheKey = `project:${normalizedProjectId};filters:${projectFilterKey}`;
+      let requestPromise;
+
+      if (PROJECT_RECOMMENDATIONS_CACHE.has(cacheKey)) {
+        const cached = PROJECT_RECOMMENDATIONS_CACHE.get(cacheKey);
+        const isFresh =
+          Date.now() - Number(cached?.cachedAt || 0) <
+          PROJECT_RECOMMENDATIONS_CACHE_TTL_MS;
+
+        if (!isFresh) {
+          PROJECT_RECOMMENDATIONS_CACHE.delete(cacheKey);
+        } else {
+          if (isMounted() && requestId === vendorsRequestRef.current) {
+            setAllVendors(cached.vendors);
+            setRecommendationsMeta(cached.meta);
+          }
+          return;
+        }
+      }
+
+      requestPromise = PROJECT_RECOMMENDATIONS_IN_FLIGHT.get(cacheKey);
+
       if (!requestPromise) {
         requestPromise = (async () => {
           const accessToken = await getAccessTokenSilently();
-          const response = await vendorsAPI.getListing(accessToken, normalizedFilters);
-          return Array.isArray(response) ? response : [];
+          const response = await projectAPI.getRecommendations(
+            normalizedProjectId,
+            accessToken,
+            normalizedFilters,
+          );
+
+          return {
+            vendors: Array.isArray(response?.recommendedVendors)
+              ? response.recommendedVendors
+              : [],
+            meta: {
+              projectId: response?.projectId || normalizedProjectId,
+              scoringVersion: response?.scoringVersion || 'v1',
+              computedAt: response?.computedAt || null,
+              totalRecommended: Number(response?.totalRecommended || 0),
+            },
+          };
         })();
 
-        VENDOR_LISTING_IN_FLIGHT.set(cacheKey, requestPromise);
+        PROJECT_RECOMMENDATIONS_IN_FLIGHT.set(cacheKey, requestPromise);
       }
 
-      const vendorResults = await requestPromise;
-      VENDOR_LISTING_CACHE.set(cacheKey, vendorResults);
+      const recommendationResult = await requestPromise;
+      PROJECT_RECOMMENDATIONS_CACHE.set(cacheKey, {
+        ...recommendationResult,
+        cachedAt: Date.now(),
+      });
 
       if (isMounted() && requestId === vendorsRequestRef.current) {
-        setAllVendors(vendorResults);
-        setRecommendationsMeta(null);
+        setAllVendors(recommendationResult.vendors);
+        setRecommendationsMeta(recommendationResult.meta);
       }
 
-      if (VENDOR_LISTING_IN_FLIGHT.get(cacheKey) === requestPromise) {
-        VENDOR_LISTING_IN_FLIGHT.delete(cacheKey);
+      if (
+        PROJECT_RECOMMENDATIONS_IN_FLIGHT.get(cacheKey) === requestPromise
+      ) {
+        PROJECT_RECOMMENDATIONS_IN_FLIGHT.delete(cacheKey);
       }
     } catch (err) {
-      if (isProjectRecommendationMode && normalizedProjectId) {
+      if (normalizedProjectId) {
         const projectFilterKey = getFiltersCacheKey(normalizedFilters);
         PROJECT_RECOMMENDATIONS_IN_FLIGHT.delete(
           `project:${normalizedProjectId};filters:${projectFilterKey}`,
         );
-      } else {
-        VENDOR_LISTING_IN_FLIGHT.delete(getFiltersCacheKey(normalizedFilters));
       }
 
       if (isMounted() && requestId === vendorsRequestRef.current) {
@@ -309,6 +280,16 @@ export const useVendorListing = ({ projectId } = {}) => {
     setFilters(createDefaultFilters());
   }, []);
 
+  const setExpandedGroup = useCallback((groupKey) => {
+    setExpandedFilterGroupKey((prev) => {
+      if (!groupKey) {
+        return null;
+      }
+
+      return prev === groupKey ? null : groupKey;
+    });
+  }, []);
+
   const clearSearch = useCallback(() => {
     setSearchInput('');
     setSearchQuery('');
@@ -362,6 +343,10 @@ export const useVendorListing = ({ projectId } = {}) => {
     VENDOR_LISTING_UI_STATE.searchInput = searchInput;
   }, [searchInput]);
 
+  useEffect(() => {
+    VENDOR_LISTING_UI_STATE.expandedFilterGroupKey = expandedFilterGroupKey;
+  }, [expandedFilterGroupKey]);
+
   return {
     vendors,
     allVendors,
@@ -377,6 +362,8 @@ export const useVendorListing = ({ projectId } = {}) => {
     activeFilterCount,
     toggleFilterOption,
     clearFilters,
+    expandedFilterGroupKey,
+    setExpandedGroup,
     searchInput,
     searchQuery,
     hasSearchQuery,
