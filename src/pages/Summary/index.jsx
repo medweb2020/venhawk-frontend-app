@@ -117,14 +117,26 @@ const Summary = () => {
 
       // Submit project and get matched vendors
       const response = await projectAPI.submitProject(apiPayload, accessToken);
+      const createdProjectId = response?.project?.id || null;
 
       // Store matched vendors in context
-      if (response.matchedVendors) {
-        updateProjectData({ matchedVendors: response.matchedVendors });
-      }
+      updateProjectData({
+        matchedVendors: response?.matchedVendors || [],
+        latestProjectId: createdProjectId,
+        recommendationsMeta: createdProjectId
+          ? {
+              projectId: createdProjectId,
+              computedAt: new Date().toISOString(),
+              scoringVersion: 'v1',
+              totalRecommended: Array.isArray(response?.matchedVendors)
+                ? response.matchedVendors.length
+                : 0,
+            }
+          : null,
+      });
 
       // Navigate to vendors page to display results
-      navigate('/vendors');
+      navigate(createdProjectId ? `/vendors?projectId=${createdProjectId}` : '/vendors');
     } catch (err) {
       // Parse error message - check if it's a validation error with multiple messages
       try {

@@ -32,6 +32,8 @@ export const ProjectProvider = ({ children }) => {
 
     // Matched vendors from API response
     matchedVendors: [],
+    latestProjectId: null,
+    recommendationsMeta: null,
   });
 
   // Update specific fields - supports both object and function
@@ -63,6 +65,8 @@ export const ProjectProvider = ({ children }) => {
       minBudget: '',
       maxBudget: '',
       matchedVendors: [],
+      latestProjectId: null,
+      recommendationsMeta: null,
     });
   };
 
