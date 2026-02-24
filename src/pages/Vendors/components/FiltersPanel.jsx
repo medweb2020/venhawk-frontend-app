@@ -34,7 +34,7 @@ const FiltersPanel = ({
       <div className="bg-white rounded-[18px] border border-[#DFE3E8] p-6 min-h-[640px]">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <h4 className="text-[32px] leading-none font-bold tracking-[-0.4px] text-[#3D464F]">
+            <h4 className="text-[28px] leading-none font-bold tracking-[-0.3px] text-[#3D464F]">
               Filters
             </h4>
             {hasFilters && (
@@ -93,7 +93,7 @@ const FiltersPanel = ({
                     aria-controls={`filter-group-${group.key}`}
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-[18px] font-semibold leading-none text-[#3D464F] truncate">
+                      <span className="text-[16px] font-semibold leading-[1.2] text-[#3D464F]">
                         {group.label}
                       </span>
                       {selectedCount > 0 && (
