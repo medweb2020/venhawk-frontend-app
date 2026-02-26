@@ -6,9 +6,7 @@ import { withAppLoader } from './loadingManager';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
-const buildVendorListingEndpoint = (filters = {}) => {
-  const queryParams = new URLSearchParams();
-
+const appendArrayFilters = (queryParams, filters = {}) => {
   Object.entries(filters).forEach(([filterKey, values]) => {
     if (!Array.isArray(values)) {
       return;
@@ -19,9 +17,24 @@ const buildVendorListingEndpoint = (filters = {}) => {
       .filter(Boolean)
       .forEach((value) => queryParams.append(filterKey, value));
   });
+};
+
+const buildVendorListingEndpoint = (filters = {}) => {
+  const queryParams = new URLSearchParams();
+
+  appendArrayFilters(queryParams, filters);
 
   const queryString = queryParams.toString();
   return queryString ? `/vendors/listing?${queryString}` : '/vendors/listing';
+};
+
+const buildProjectRecommendationsEndpoint = (projectId, filters = {}) => {
+  const queryParams = new URLSearchParams();
+  appendArrayFilters(queryParams, filters);
+
+  const queryString = queryParams.toString();
+  const basePath = `/projects/${projectId}/recommendations`;
+  return queryString ? `${basePath}?${queryString}` : basePath;
 };
 
 /**
@@ -118,6 +131,35 @@ export const projectAPI = {
    */
   getProject: async (projectId, accessToken) => {
     return fetchAPI(`/projects/${projectId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  },
+
+  /**
+   * Generate project-specific vendor recommendations
+   * @param {number|string} projectId - Project ID
+   * @param {string} accessToken - Auth0 access token
+   * @returns {Promise<Object>} Recommendation response
+   */
+  generateRecommendations: async (projectId, accessToken) => {
+    return fetchAPI(`/projects/${projectId}/recommendations`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  },
+
+  /**
+   * Get recommendations for a project
+   * @param {number|string} projectId - Project ID
+   * @param {string} accessToken - Auth0 access token
+   * @returns {Promise<Object>} Recommendation response
+   */
+  getRecommendations: async (projectId, accessToken, filters = {}) => {
+    return fetchAPI(buildProjectRecommendationsEndpoint(projectId, filters), {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },

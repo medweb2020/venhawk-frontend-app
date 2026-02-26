@@ -32,25 +32,6 @@ export const useVendorDetail = (vendorId) => {
         setVendor(response || null);
       }
     } catch (err) {
-      // Backward-compatible fallback in case detail endpoint is unavailable.
-      try {
-        const accessToken = await getAccessTokenSilently();
-        const listing = await vendorsAPI.getListing(accessToken);
-        const matchedVendor = listing.find(
-          (item) => item.vendorId === vendorId || String(item.id) === String(vendorId)
-        );
-
-        if (isMounted() && matchedVendor) {
-          setVendor(matchedVendor);
-          setError('');
-          setLoading(false);
-          return;
-        }
-      } catch (fallbackErr) {
-        // Ignore fallback errors and return the original error below.
-        void fallbackErr;
-      }
-
       if (isMounted()) {
         setVendor(null);
         setError(err.message || 'Failed to load vendor details.');
