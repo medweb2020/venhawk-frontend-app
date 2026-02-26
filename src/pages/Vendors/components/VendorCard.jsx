@@ -6,7 +6,7 @@ import VendorImage from './VendorImage';
 const VendorCard = ({ vendor, projectId }) => {
   const vendorIdentifier = vendor.vendorId || vendor.id;
   const detailPath = projectId
-    ? `/vendors/${vendorIdentifier}?projectId=${encodeURIComponent(projectId)}`
+    ? `/projects/${encodeURIComponent(projectId)}/vendors/${encodeURIComponent(vendorIdentifier)}`
     : `/vendors/${vendorIdentifier}`;
   const normalizedMatchingScore = Number(vendor?.matchingScore);
   const hasMatchingScore =

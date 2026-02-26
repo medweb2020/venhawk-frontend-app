@@ -122,7 +122,6 @@ const Summary = () => {
       // Store matched vendors in context
       updateProjectData({
         matchedVendors: response?.matchedVendors || [],
-        latestProjectId: createdProjectId,
         recommendationsMeta: createdProjectId
           ? {
               projectId: createdProjectId,
@@ -135,7 +134,7 @@ const Summary = () => {
       });
 
       // Navigate to vendors page to display results
-      navigate(createdProjectId ? `/vendors?projectId=${createdProjectId}` : '/vendors');
+      navigate(createdProjectId ? `/projects/${createdProjectId}/vendors` : '/vendors');
     } catch (err) {
       // Parse error message - check if it's a validation error with multiple messages
       try {

@@ -1,16 +1,49 @@
-import { Routes, Route } from 'react-router-dom';
+import {
+  Navigate,
+  Route,
+  Routes,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Landing from './pages/Landing';
 import BudgetTimeline from './pages/BudgetTimeline';
 import Summary from './pages/Summary';
 import Vendors from './pages/Vendors';
 import VendorDetail from './pages/Vendors/detail';
-import Login from './pages/Login';
 import Callback from './pages/Callback';
 import NotFound from './pages/NotFound';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import { useUserSync } from './hooks/useUserSync';
 import { useAppLoading } from './hooks/useAppLoading';
+
+function LegacyVendorsRoute() {
+  const [searchParams] = useSearchParams();
+  const projectId = String(searchParams.get('projectId') || '').trim();
+
+  if (/^\d+$/.test(projectId)) {
+    return <Navigate to={`/projects/${projectId}/vendors`} replace />;
+  }
+
+  return <Vendors />;
+}
+
+function LegacyVendorDetailRoute() {
+  const [searchParams] = useSearchParams();
+  const { vendorId } = useParams();
+  const projectId = String(searchParams.get('projectId') || '').trim();
+
+  if (vendorId && /^\d+$/.test(projectId)) {
+    return (
+      <Navigate
+        to={`/projects/${projectId}/vendors/${encodeURIComponent(vendorId)}`}
+        replace
+      />
+    );
+  }
+
+  return <VendorDetail />;
+}
 
 /**
  * App Component
@@ -58,7 +91,7 @@ function App() {
           }
         />
         <Route
-          path="/vendors"
+          path="/projects/:projectId/vendors"
           element={
             <ProtectedRoute>
               <Vendors />
@@ -66,10 +99,26 @@ function App() {
           }
         />
         <Route
-          path="/vendors/:vendorId"
+          path="/projects/:projectId/vendors/:vendorId"
           element={
             <ProtectedRoute>
               <VendorDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/vendors"
+          element={
+            <ProtectedRoute>
+              <LegacyVendorsRoute />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/vendors/:vendorId"
+          element={
+            <ProtectedRoute>
+              <LegacyVendorDetailRoute />
             </ProtectedRoute>
           }
         />

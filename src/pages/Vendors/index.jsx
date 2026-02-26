@@ -1,5 +1,4 @@
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useProject } from '../../context/ProjectContext';
+import { useNavigate, useParams } from 'react-router-dom';
 import Header from '../../components/layout/Header';
 import EmptyState from './components/EmptyState';
 import FiltersPanel from './components/FiltersPanel';
@@ -9,11 +8,7 @@ import { useVendorListing } from './hooks/useVendorListing';
 
 const Vendors = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { projectData } = useProject();
-
-  const requestedProjectId =
-    searchParams.get('projectId') || projectData?.latestProjectId || null;
+  const { projectId: routeProjectId } = useParams();
 
   const {
     vendors,
@@ -29,7 +24,7 @@ const Vendors = () => {
     clearFilters,
     expandedFilterGroupKey,
     setExpandedGroup,
-  } = useVendorListing({ projectId: requestedProjectId });
+  } = useVendorListing({ projectId: routeProjectId });
 
   const hasProjectContext = Boolean(projectId);
 

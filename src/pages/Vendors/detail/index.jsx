@@ -1,5 +1,4 @@
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useProject } from '../../../context/ProjectContext';
+import { useNavigate, useParams } from 'react-router-dom';
 import Header from '../../../components/layout/Header';
 import { useVendorDetail } from '../hooks/useVendorDetail';
 import CaseStudiesSection from './components/CaseStudiesSection';
@@ -12,17 +11,13 @@ import { CASE_STUDIES, KEY_CLIENTS, TESTIMONIALS } from './data/staticContent';
 
 const VendorDetail = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { projectData } = useProject();
-  const { vendorId } = useParams();
-  const backProjectId =
-    searchParams.get('projectId') || projectData?.latestProjectId || null;
+  const { vendorId, projectId } = useParams();
 
   const { vendor, loading, error } = useVendorDetail(vendorId);
 
   const handleBack = () => {
-    if (backProjectId) {
-      navigate(`/vendors?projectId=${encodeURIComponent(backProjectId)}`);
+    if (projectId) {
+      navigate(`/projects/${encodeURIComponent(projectId)}/vendors`);
       return;
     }
 
