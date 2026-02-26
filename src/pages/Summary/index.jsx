@@ -127,7 +127,6 @@ const Summary = () => {
           ? {
               projectId: createdProjectId,
               computedAt: new Date().toISOString(),
-              scoringVersion: 'v1',
               totalRecommended: Array.isArray(response?.matchedVendors)
                 ? response.matchedVendors.length
                 : 0,

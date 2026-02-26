@@ -153,7 +153,7 @@ export const projectAPI = {
   },
 
   /**
-   * Get latest stored recommendations for a project
+   * Get recommendations for a project
    * @param {number|string} projectId - Project ID
    * @param {string} accessToken - Auth0 access token
    * @returns {Promise<Object>} Recommendation response

@@ -176,7 +176,6 @@ export const useVendorListing = ({ projectId } = {}) => {
               : [],
             meta: {
               projectId: response?.projectId || normalizedProjectId,
-              scoringVersion: response?.scoringVersion || 'v1',
               computedAt: response?.computedAt || null,
               totalRecommended: Number(response?.totalRecommended || 0),
             },
