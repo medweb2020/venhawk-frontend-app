@@ -6,6 +6,7 @@ const VENDOR_SEARCH_STRATEGY = {
 const FIELD_WEIGHTS = {
   name: 8,
   specialty: 6,
+  specialtyFull: 5,
   category: 5,
   location: 4,
   description: 3,
@@ -25,6 +26,7 @@ const indexVendorText = (vendor = {}) => {
   return {
     name: normalizeText(vendor.name),
     specialty: normalizeText(vendor.specialty),
+    specialtyFull: normalizeText(vendor.specialtyFull),
     category: normalizeText(vendor.category),
     location: normalizeText(vendor.location),
     description: normalizeText(vendor.description),
@@ -117,4 +119,3 @@ export const searchVendors = ({
 };
 
 export { VENDOR_SEARCH_STRATEGY };
-

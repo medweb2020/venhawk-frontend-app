@@ -39,6 +39,7 @@ const VendorProfilePanel = ({ vendor }) => {
   const budgetLabel = vendor.startFrom?.toLowerCase().includes('contact')
     ? vendor.startFrom
     : `${vendor.startFrom || '$50k'} Starting`;
+  const specialtyText = vendor.specialtyFull || vendor.specialty || 'Finance';
 
   return (
     <section className="w-full xl:max-w-[560px] min-h-[430px] flex flex-col justify-between">
@@ -86,7 +87,7 @@ const VendorProfilePanel = ({ vendor }) => {
         <div className="mt-5 sm:mt-7 space-y-2 text-[14px] sm:text-[15px] font-semibold text-[#697077]">
           <p>
             <span className="text-[#535B64]">Speciality :</span>
-            <span className="ml-3">{vendor.specialty || 'Finance'}</span>
+            <span className="ml-3">{specialtyText}</span>
           </p>
           <p>
             <span className="text-[#535B64]">Budget :</span>
