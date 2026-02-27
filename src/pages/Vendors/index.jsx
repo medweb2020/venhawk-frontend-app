@@ -72,7 +72,7 @@ const Vendors = () => {
               ) : vendors.length === 0 ? (
                 <EmptyState
                   title="No vendors found"
-                  description="No recommended vendors were generated for this project."
+                  description="No vendors matched this search. Try refining your system name, category, or budget and run the search again."
                   actionLabel={
                     activeFilterCount > 0 ? 'Clear filters' : ''
                   }

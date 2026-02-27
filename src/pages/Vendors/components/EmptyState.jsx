@@ -32,7 +32,8 @@ EmptyState.propTypes = {
 
 EmptyState.defaultProps = {
   title: 'No vendors found',
-  description: 'Try adjusting your search query.',
+  description:
+    'No vendors matched this search. Refine your criteria and try again.',
   actionLabel: '',
   onAction: undefined,
 };

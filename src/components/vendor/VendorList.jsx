@@ -5,7 +5,12 @@ import VendorCard from './VendorCard';
  * VendorList Component
  * @description List container for displaying multiple vendor cards
  */
-const VendorList = ({ vendors = [], onViewDetails, onContact, emptyMessage = 'No vendors found.' }) => {
+const VendorList = ({
+  vendors = [],
+  onViewDetails,
+  onContact,
+  emptyMessage = 'No vendors found. Refine your search and try again.',
+}) => {
   if (vendors.length === 0) {
     return (
       <div className="text-center py-12">
