@@ -1,7 +1,10 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../../context/ProjectContext';
-import { INDUSTRY_OPTIONS, PROJECT_CATEGORY_OPTIONS } from '../../constants/projectOptions';
+import {
+  INDUSTRY_OPTIONS,
+  PROJECT_CATEGORY_OPTIONS,
+} from '../../constants/projectOptions';
 import Header from '../../components/layout/Header';
 import LeftSidebar from '../../components/layout/LeftSidebar';
 import Stepper from '../../components/common/Stepper';
@@ -54,7 +57,6 @@ const Landing = () => {
       formData.projectObjective &&
       formData.businessRequirements;
 
-    // If "Other" is selected for project category, projectCategoryOther is also required
     if (formData.projectCategory === 'other') {
       return mandatoryFieldsFilled && formData.projectCategoryOther;
     }
@@ -148,7 +150,7 @@ const Landing = () => {
                   <Input
                     label="System Name to be Implemented"
                     name="systemName"
-                    placeholder="e.g., Intapp, iManage, ServiceNow, Workday"
+                    placeholder="e.g., Intapp Terms, Azure migration, ServiceNow support"
                     value={formData.systemName}
                     onChange={(e) => handleChange('systemName', e.target.value)}
                     required

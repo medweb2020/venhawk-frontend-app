@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 
@@ -20,8 +20,7 @@ const DatePicker = ({
   className,
   ...rest
 }) => {
-  const [internalValue, setInternalValue] = useState('');
-  const dateInputRef = useState(null);
+  const dateInputRef = useRef(null);
 
   // Convert YYYY-MM-DD to MM/DD/YYYY
   const formatDisplayDate = (dateStr) => {
@@ -30,26 +29,50 @@ const DatePicker = ({
     return `${month}/${day}/${year}`;
   };
 
-  // Convert MM/DD/YYYY to YYYY-MM-DD
-  const formatISODate = (displayStr) => {
-    if (!displayStr) return '';
-    const [month, day, year] = displayStr.split('/');
-    if (month && day && year) {
-      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  const normalizeToISODate = (rawValue) => {
+    const trimmed = String(rawValue || '').trim();
+    if (!trimmed) return '';
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+      return trimmed;
     }
+
+    const parts = trimmed.split('/');
+    if (parts.length === 3) {
+      const [month, day, year] = parts.map((part) => part.trim());
+      if (month && day && year?.length === 4) {
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      }
+    }
+
     return '';
   };
 
-  const handleCalendarClick = () => {
-    const dateInput = document.getElementById(`${name}-date-hidden`);
-    if (dateInput) {
-      dateInput.showPicker();
+  const openPicker = (event) => {
+    if (disabled) {
+      return;
     }
+
+    if (event?.type === 'click') {
+      event.preventDefault();
+    }
+
+    const dateInput = dateInputRef.current;
+    if (!dateInput) {
+      return;
+    }
+
+    if (typeof dateInput.showPicker === 'function') {
+      dateInput.showPicker();
+      return;
+    }
+
+    dateInput.focus();
+    dateInput.click();
   };
 
   const handleCalendarChange = (e) => {
     const isoDate = e.target.value;
-    setInternalValue(isoDate);
 
     // Create a synthetic event with formatted date
     const formattedDate = formatDisplayDate(isoDate);
@@ -65,11 +88,11 @@ const DatePicker = ({
   };
 
   const handleDisplayChange = (e) => {
-    const displayValue = e.target.value;
     onChange(e);
   };
 
   const displayValue = value || '';
+  const hiddenDateValue = normalizeToISODate(displayValue);
 
   return (
     <div className="w-full">
@@ -89,6 +112,7 @@ const DatePicker = ({
           type="text"
           value={displayValue}
           onChange={handleDisplayChange}
+          onClick={openPicker}
           onBlur={onBlur}
           disabled={disabled}
           required={required}
@@ -108,7 +132,7 @@ const DatePicker = ({
         {/* Calendar Icon Button */}
         <button
           type="button"
-          onClick={handleCalendarClick}
+          onClick={openPicker}
           className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-900"
           disabled={disabled}
         >
@@ -119,8 +143,9 @@ const DatePicker = ({
         {/* Hidden date input for native calendar */}
         <input
           id={`${name}-date-hidden`}
+          ref={dateInputRef}
           type="date"
-          value={internalValue}
+          value={hiddenDateValue}
           onChange={handleCalendarChange}
           className="absolute inset-0 opacity-0 pointer-events-none"
           tabIndex={-1}
