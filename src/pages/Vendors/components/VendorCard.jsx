@@ -21,9 +21,7 @@ const VendorCard = ({ vendor, projectId }) => {
   const matchingScoreLabel = hasMatchingScore
     ? `${Math.max(0, Math.min(100, Math.round(normalizedMatchingScore)))}% Match`
     : null;
-  const reasonSourceLabel = vendor?.matchingReasonSource === 'openai'
-    ? 'AI Insight'
-    : 'Venhawk Insight';
+  const reasonSourceLabel = 'Ven AI';
 
   return (
     <Link to={detailPath} className="block h-full group cursor-pointer">
@@ -42,9 +40,7 @@ const VendorCard = ({ vendor, projectId }) => {
 
           <div className="min-w-0 flex-1 relative">
             <h3 className="text-[18px] font-semibold text-[#3D464F] truncate pr-28">{vendor.name}</h3>
-            <div className="flex items-center gap-2 mt-1 mb-2 text-[14px]">
-              <span className="font-medium text-[#535B64] truncate">{vendor.category}</span>
-              <span className="w-[7px] h-[7px] rounded-full bg-[#D9D9D9] shrink-0" />
+            <div className="mt-1 mb-2 text-[14px]">
               <span className="font-medium text-[#3D464F] truncate">{vendor.location}</span>
             </div>
             <StarRating rating={vendor.rating} idPrefix={`vendor-${vendor.id}`} />
@@ -52,7 +48,7 @@ const VendorCard = ({ vendor, projectId }) => {
             <div className="absolute top-[-4px] right-[-4px] flex flex-col items-end gap-1">
               <TierBadge tier={vendor.tier} />
               {hasMatchingScore && (
-                <div className="relative group/score-chip">
+                <div>
                   <span
                     className={`inline-flex h-[24px] items-center rounded-full px-[11px] text-[13px] font-semibold shadow-[0_0_4px_0_rgba(10,37,64,0.07)] ${
                       hasMatchingReason
@@ -72,21 +68,6 @@ const VendorCard = ({ vendor, projectId }) => {
                     )}
                     {matchingScoreLabel}
                   </span>
-
-                  {hasMatchingReason && (
-                    <div className="pointer-events-none absolute right-0 top-[calc(100%+9px)] z-30 w-[520px] max-w-[95vw] rounded-[12px] border border-[#D5E0EC] bg-[linear-gradient(180deg,#0A223A_0%,#0F2F4D_100%)] p-4 text-[12px] leading-[1.58] text-[#EAF2FA] shadow-[0_14px_34px_rgba(7,24,40,0.45)] opacity-0 translate-y-1 transition-all duration-200 group-hover/score-chip:opacity-100 group-hover/score-chip:translate-y-0">
-                      <div className="absolute -top-1.5 right-6 h-3 w-3 rotate-45 border-l border-t border-[#D5E0EC] bg-[#0D2A45]" />
-                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.07em] text-[#BFD7EF]">
-                        Venhawk Reasoning
-                      </p>
-                      <p className="mb-2 text-[14px] font-medium text-white whitespace-normal">
-                        {matchingReason}
-                      </p>
-                      <p className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.06em] text-[#D4E6F7]">
-                        {reasonSourceLabel}
-                      </p>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
