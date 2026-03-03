@@ -76,23 +76,21 @@ const VendorCard = ({ vendor, projectId }) => {
 
         <div className="mb-4">
           <p
-            className="h-[108px] overflow-hidden text-[16px] text-[#59626B] leading-[1.5]"
+            className="overflow-hidden text-[15px] sm:text-[16px] text-[#59626B] leading-[1.5] break-words"
             style={{
               display: '-webkit-box',
-              WebkitLineClamp: 4,
+              WebkitLineClamp: 5,
               WebkitBoxOrient: 'vertical',
             }}
           >
             {bodyPrimaryText}
           </p>
-          <div className="mt-1 h-[16px]">
-            <p
-              className={`text-[11px] font-semibold uppercase tracking-[0.06em] ${
-                hasMatchingReason ? 'text-[#7A8792]' : 'invisible'
-              }`}
-            >
-              {reasonSourceLabel}
-            </p>
+          <div className="mt-2 min-h-[16px]">
+            {hasMatchingReason ? (
+              <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#7A8792]">
+                {reasonSourceLabel}
+              </p>
+            ) : null}
           </div>
         </div>
 
