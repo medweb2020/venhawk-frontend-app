@@ -2,7 +2,90 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { useCallback, useEffect, useState } from 'react';
 import { vendorsAPI } from '../../../services/api';
 
-export const useVendorDetail = (vendorId) => {
+const toInitials = (name) => {
+  const words = String(name || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (words.length === 0) {
+    return 'VC';
+  }
+
+  if (words.length === 1) {
+    return words[0].slice(0, 2).toUpperCase();
+  }
+
+  return `${words[0][0]}${words[1][0]}`.toUpperCase();
+};
+
+const normalizeKey = (value) => String(value || '')
+  .toLowerCase()
+  .replace(/[^a-z0-9\s]/g, ' ')
+  .replace(/\s+/g, ' ')
+  .trim();
+
+const uniqueBy = (items, keySelector) => {
+  const seen = new Set();
+  return items.filter((item) => {
+    const key = keySelector(item);
+    if (!key || seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+};
+
+const normalizeVendorDetailResponse = (response) => {
+  const keyClients = Array.isArray(response?.keyClients) ? response.keyClients : [];
+  const caseStudies = Array.isArray(response?.caseStudies) ? response.caseStudies : [];
+  const reviews = Array.isArray(response?.reviews) ? response.reviews : [];
+
+  return {
+    ...(response || {}),
+    keyClients: uniqueBy(keyClients.map((client, index) => ({
+      id: client?.id || `client-${index + 1}`,
+      label: String(client?.name || '').trim(),
+      logoSrc: String(client?.logoUrl || '').trim() || null,
+      websiteUrl: String(client?.websiteUrl || '').trim() || null,
+      sourceName: String(client?.sourceName || '').trim() || null,
+      sourceUrl: String(client?.sourceUrl || '').trim() || null,
+    }))
+      .filter((client) => String(client.label || '').trim().length > 1), (client) => normalizeKey(client.label)),
+    caseStudies: uniqueBy(caseStudies.map((study, index) => ({
+      id: study?.id || `case-study-${index + 1}`,
+      title: String(study?.title || '').trim(),
+      summary: String(study?.summary || '').trim(),
+      studyUrl: String(study?.studyUrl || '').trim() || null,
+      sourceName: String(study?.sourceName || '').trim() || null,
+      sourceUrl: String(study?.sourceUrl || '').trim() || null,
+    }))
+      .filter((study) => String(study.title || '').trim().length > 0 && String(study.summary || '').trim().length > 0), (study) => normalizeKey(study.title)),
+    reviews: uniqueBy(reviews.map((review, index) => {
+      const author = String(review?.reviewerName || '').trim();
+      const source = String(review?.source || '').trim();
+      const role = String(review?.reviewerRole || '').trim();
+
+      return {
+        id: review?.id || `review-${index + 1}`,
+        author,
+        role: role || source || null,
+        headline: String(review?.headline || '').trim(),
+        quote: String(review?.quote || '').trim(),
+        initials: toInitials(author),
+        rating: Number(review?.rating || 0) || null,
+        source: source || null,
+        sourceUrl: String(review?.sourceUrl || '').trim() || null,
+        publishedAt: review?.publishedAt || null,
+      };
+    })
+      .filter((review) => String(review.author || '').trim().length > 0 && String(review.quote || '').trim().length > 0), (review) => `${normalizeKey(review.author)}::${normalizeKey(review.quote).slice(0, 180)}`),
+  };
+};
+
+export const useVendorDetail = (vendorId, projectId = null) => {
   const { getAccessTokenSilently } = useAuth0();
 
   const [vendor, setVendor] = useState(null);
@@ -26,10 +109,12 @@ export const useVendorDetail = (vendorId) => {
 
     try {
       const accessToken = await getAccessTokenSilently();
-      const response = await vendorsAPI.getListingVendor(vendorId, accessToken);
+      const response = await vendorsAPI.getVendorDetail(vendorId, accessToken, {
+        projectId,
+      });
 
       if (isMounted()) {
-        setVendor(response || null);
+        setVendor(normalizeVendorDetailResponse(response));
       }
     } catch (err) {
       if (isMounted()) {
@@ -41,7 +126,7 @@ export const useVendorDetail = (vendorId) => {
         setLoading(false);
       }
     }
-  }, [getAccessTokenSilently, vendorId]);
+  }, [getAccessTokenSilently, projectId, vendorId]);
 
   useEffect(() => {
     let isMounted = true;

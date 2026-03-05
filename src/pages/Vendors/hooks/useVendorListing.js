@@ -85,6 +85,7 @@ export const useVendorListing = ({ projectId } = {}) => {
 
   const [allVendors, setAllVendors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isGeneratingRecommendations, setIsGeneratingRecommendations] = useState(false);
   const [error, setError] = useState('');
   const [recommendationsMeta, setRecommendationsMeta] = useState(null);
   const [filters, setFilters] = useState(() =>
@@ -103,6 +104,7 @@ export const useVendorListing = ({ projectId } = {}) => {
   const [searchQuery, setSearchQuery] = useState(
     () => String(VENDOR_LISTING_UI_STATE.searchInput || '').trim(),
   );
+  const hasLoadedRecommendationsRef = useRef(false);
 
   const normalizedFilters = useMemo(
     () => normalizeFilterState(filters),
@@ -119,6 +121,7 @@ export const useVendorListing = ({ projectId } = {}) => {
   const loadVendors = useCallback(async (isMounted = () => true) => {
     const requestId = ++vendorsRequestRef.current;
     setLoading(true);
+    setIsGeneratingRecommendations(false);
     setError('');
 
     try {
@@ -126,6 +129,7 @@ export const useVendorListing = ({ projectId } = {}) => {
         if (isMounted() && requestId === vendorsRequestRef.current) {
           setAllVendors([]);
           setRecommendationsMeta(null);
+          setIsGeneratingRecommendations(false);
         }
         return;
       }
@@ -134,6 +138,7 @@ export const useVendorListing = ({ projectId } = {}) => {
         if (isMounted() && requestId === vendorsRequestRef.current) {
           setAllVendors([]);
           setRecommendationsMeta(null);
+          setIsGeneratingRecommendations(false);
         }
         return;
       }
@@ -154,12 +159,18 @@ export const useVendorListing = ({ projectId } = {}) => {
           if (isMounted() && requestId === vendorsRequestRef.current) {
             setAllVendors(cached.vendors);
             setRecommendationsMeta(cached.meta);
+            setIsGeneratingRecommendations(false);
           }
+          hasLoadedRecommendationsRef.current = true;
           return;
         }
       }
 
       requestPromise = PROJECT_RECOMMENDATIONS_IN_FLIGHT.get(cacheKey);
+
+      if (!hasLoadedRecommendationsRef.current && isMounted()) {
+        setIsGeneratingRecommendations(true);
+      }
 
       if (!requestPromise) {
         requestPromise = (async () => {
@@ -194,7 +205,9 @@ export const useVendorListing = ({ projectId } = {}) => {
       if (isMounted() && requestId === vendorsRequestRef.current) {
         setAllVendors(recommendationResult.vendors);
         setRecommendationsMeta(recommendationResult.meta);
+        setIsGeneratingRecommendations(false);
       }
+      hasLoadedRecommendationsRef.current = true;
 
       if (
         PROJECT_RECOMMENDATIONS_IN_FLIGHT.get(cacheKey) === requestPromise
@@ -213,6 +226,7 @@ export const useVendorListing = ({ projectId } = {}) => {
         setError(err.message || 'Failed to load vendors.');
         setAllVendors([]);
         setRecommendationsMeta(null);
+        setIsGeneratingRecommendations(false);
       }
     } finally {
       if (isMounted() && requestId === vendorsRequestRef.current) {
@@ -374,11 +388,13 @@ export const useVendorListing = ({ projectId } = {}) => {
     VENDOR_LISTING_UI_STATE.filters = createDefaultFilters();
     VENDOR_LISTING_UI_STATE.searchInput = '';
     VENDOR_LISTING_UI_STATE.expandedFilterGroupKey = null;
+    hasLoadedRecommendationsRef.current = false;
 
     setFilters(createDefaultFilters());
     setSearchInput('');
     setSearchQuery('');
     setExpandedFilterGroupKey(null);
+    setIsGeneratingRecommendations(false);
   }, [projectScopeKey]);
 
   useEffect(() => {
@@ -389,6 +405,7 @@ export const useVendorListing = ({ projectId } = {}) => {
     vendors,
     allVendors,
     loading,
+    isGeneratingRecommendations,
     error,
     isProjectRecommendationMode,
     projectId: normalizedProjectId,

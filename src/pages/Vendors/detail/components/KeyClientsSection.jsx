@@ -1,7 +1,57 @@
-import { useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
+
+const buildClientInitials = (label) => {
+  const words = String(label || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (words.length === 0) {
+    return 'CL';
+  }
+  if (words.length === 1) {
+    return words[0].slice(0, 2).toUpperCase();
+  }
+  return `${words[0][0]}${words[1][0]}`.toUpperCase();
+};
+
+const ClientLogoBadge = ({ client }) => {
+  const [logoLoadFailed, setLogoLoadFailed] = useState(false);
+  const initials = useMemo(() => buildClientInitials(client.label), [client.label]);
+  const shouldShowImage = Boolean(client.logoSrc) && !logoLoadFailed;
+
+  if (shouldShowImage) {
+    return (
+      <img
+        src={client.logoSrc}
+        alt={client.label}
+        className={client.logoClassName || 'h-[48px] w-auto object-contain'}
+        loading="lazy"
+        onError={() => setLogoLoadFailed(true)}
+      />
+    );
+  }
+
+  return (
+    <div className="h-[52px] w-[120px] sm:h-[58px] sm:w-[138px] rounded-[10px] border border-[#D8DEE5] bg-[linear-gradient(145deg,#F7FAFD_0%,#EBF1F8_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] px-2 flex items-center justify-center">
+      <div className="text-center leading-[1.1]">
+        <p className="text-[12px] sm:text-[13px] font-semibold text-[#40566E] tracking-[0.03em]">
+          {initials}
+        </p>
+        <p className="mt-[2px] text-[9px] sm:text-[10px] font-medium text-[#5A6D82] truncate max-w-[110px] sm:max-w-[128px]">
+          {client.label}
+        </p>
+      </div>
+    </div>
+  );
+};
 
 const KeyClientsSection = ({ clients }) => {
   const scrollerRef = useRef(null);
+  const hasClients = Array.isArray(clients) && clients.length > 0;
+
+  if (!hasClients) {
+    return null;
+  }
 
   return (
     <section className="mt-8">
@@ -17,18 +67,14 @@ const KeyClientsSection = ({ clients }) => {
               key={client.id}
               className="h-[86px] sm:h-[96px] min-w-[180px] sm:min-w-[220px] px-6 sm:px-8 flex items-center justify-center"
             >
-              {client.logoSrc ? (
-                <img
-                  src={client.logoSrc}
-                  alt={client.label}
-                  className={client.logoClassName || 'h-[48px] w-auto object-contain'}
-                  loading="lazy"
-                />
-              ) : (
-                <span className="uppercase text-[#8F939A] font-semibold text-[30px] leading-none tracking-tight">
-                  {client.label}
-                </span>
-              )}
+              <a
+                href={client.websiteUrl || undefined}
+                target={client.websiteUrl ? '_blank' : undefined}
+                rel={client.websiteUrl ? 'noopener noreferrer' : undefined}
+                className="inline-flex items-center justify-center max-w-full"
+              >
+                <ClientLogoBadge client={client} />
+              </a>
             </div>
           ))}
         </div>

@@ -7,13 +7,16 @@ import KeyClientsSection from './components/KeyClientsSection';
 import TestimonialsSection from './components/TestimonialsSection';
 import VendorActionPanel from './components/VendorActionPanel';
 import VendorProfilePanel from './components/VendorProfilePanel';
-import { CASE_STUDIES, KEY_CLIENTS, TESTIMONIALS } from './data/staticContent';
 
 const VendorDetail = () => {
   const navigate = useNavigate();
   const { vendorId, projectId } = useParams();
 
-  const { vendor, loading, error } = useVendorDetail(vendorId);
+  const normalizedProjectId = Number(projectId);
+  const projectContextId = Number.isFinite(normalizedProjectId) && normalizedProjectId > 0
+    ? normalizedProjectId
+    : null;
+  const { vendor, loading, error } = useVendorDetail(vendorId, projectContextId);
 
   const handleBack = () => {
     if (projectId) {
@@ -50,9 +53,9 @@ const VendorDetail = () => {
 
             <div className="mt-6 sm:mt-8 h-[2px] w-full rounded-full bg-[#E9EAEC]" />
 
-            <KeyClientsSection clients={KEY_CLIENTS} />
-            <CaseStudiesSection studies={CASE_STUDIES} />
-            <TestimonialsSection testimonials={TESTIMONIALS} />
+            <KeyClientsSection clients={vendor.keyClients || []} />
+            <CaseStudiesSection studies={vendor.caseStudies || []} />
+            <TestimonialsSection testimonials={vendor.reviews || []} />
           </>
         )}
       </div>

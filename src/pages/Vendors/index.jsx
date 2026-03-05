@@ -13,6 +13,7 @@ const Vendors = () => {
   const {
     vendors,
     loading,
+    isGeneratingRecommendations,
     error,
     projectId,
     filters,
@@ -68,7 +69,13 @@ const Vendors = () => {
 
             <main className="flex-1">
               {loading ? (
-                <div className="min-h-[320px] bg-white/70 rounded-xl border border-[#E9EAEC]" />
+                <div className="min-h-[320px] bg-white/70 rounded-xl border border-[#E9EAEC] flex items-center justify-center px-4">
+                  {isGeneratingRecommendations ? (
+                    <p className="text-sm sm:text-base font-medium text-[#3D464F]">
+                      Generating recommendations...
+                    </p>
+                  ) : null}
+                </div>
               ) : vendors.length === 0 ? (
                 <EmptyState
                   title="No vendors found"

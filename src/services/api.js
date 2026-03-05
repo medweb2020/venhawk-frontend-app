@@ -37,6 +37,17 @@ const buildProjectRecommendationsEndpoint = (projectId, filters = {}) => {
   return queryString ? `${basePath}?${queryString}` : basePath;
 };
 
+const buildVendorDetailEndpoint = (vendorId, projectId = null) => {
+  const queryParams = new URLSearchParams();
+  if (projectId !== null && projectId !== undefined && String(projectId).trim()) {
+    queryParams.set('projectId', String(projectId).trim());
+  }
+
+  const queryString = queryParams.toString();
+  const basePath = `/vendors/${encodeURIComponent(vendorId)}/detail`;
+  return queryString ? `${basePath}?${queryString}` : basePath;
+};
+
 /**
  * Generic fetch wrapper with error handling
  */
@@ -287,6 +298,22 @@ export const vendorsAPI = {
    */
   getListingVendor: async (vendorId, accessToken) => {
     return fetchAPI(`/vendors/listing/${vendorId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  },
+
+  /**
+   * Get vendor detail profile
+   * @param {string} vendorId - Vendor UUID
+   * @param {string} accessToken - Auth0 access token
+   * @param {Object} options - Optional request context
+   * @param {number|string|null} options.projectId - Project ID context for reason/category-aware detail
+   * @returns {Promise<Object>} Vendor detail payload
+   */
+  getVendorDetail: async (vendorId, accessToken, options = {}) => {
+    return fetchAPI(buildVendorDetailEndpoint(vendorId, options?.projectId), {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },

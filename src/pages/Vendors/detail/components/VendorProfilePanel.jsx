@@ -40,6 +40,8 @@ const VendorProfilePanel = ({ vendor }) => {
     ? vendor.startFrom
     : `${vendor.startFrom || '$50k'} Starting`;
   const specialtyText = vendor.specialtyFull || vendor.specialty || 'Finance';
+  const matchingReason = String(vendor.matchingReason || '').trim();
+  const primaryDescription = matchingReason || vendor.description;
 
   return (
     <section className="w-full xl:max-w-[560px] min-h-[430px] flex flex-col justify-between">
@@ -80,7 +82,7 @@ const VendorProfilePanel = ({ vendor }) => {
         </div>
 
         <p className="mt-5 sm:mt-7 text-[14px] sm:text-[15px] leading-[1.35] text-[#3D464F]">
-          {vendor.description ||
+          {primaryDescription ||
             'At EY, our purpose is Building a better working world. The insights and quality services we provide help build trust and confidence in the capital markets and in economies the world over.'}
         </p>
 

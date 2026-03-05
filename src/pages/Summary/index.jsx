@@ -118,19 +118,21 @@ const Summary = () => {
       // Submit project and get matched vendors
       const response = await projectAPI.submitProject(apiPayload, accessToken);
       const createdProjectId = response?.project?.id || null;
+      const responseRecommendations = response?.recommendations;
 
-      // Store matched vendors in context
+      // Store response metadata in context (matchedVendors kept for backward compatibility only)
       updateProjectData({
         matchedVendors: response?.matchedVendors || [],
-        recommendationsMeta: createdProjectId
-          ? {
-              projectId: createdProjectId,
-              computedAt: new Date().toISOString(),
-              totalRecommended: Array.isArray(response?.matchedVendors)
-                ? response.matchedVendors.length
-                : 0,
-            }
-          : null,
+        recommendationsMeta:
+          createdProjectId || responseRecommendations?.projectId
+            ? {
+                projectId:
+                  Number(responseRecommendations?.projectId) || createdProjectId,
+                computedAt: responseRecommendations?.computedAt || null,
+                status: responseRecommendations?.status || 'pending',
+                totalRecommended: 0,
+              }
+            : null,
       });
 
       // Navigate to vendors page to display results
