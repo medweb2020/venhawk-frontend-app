@@ -24,7 +24,7 @@ const ClientLogoBadge = ({ client }) => {
       <img
         src={client.logoSrc}
         alt={client.label}
-        className={client.logoClassName || 'h-[48px] w-auto object-contain'}
+        className={client.logoClassName || 'max-h-[34px] sm:max-h-[40px] max-w-[120px] sm:max-w-[148px] w-auto object-contain'}
         loading="lazy"
         onError={() => setLogoLoadFailed(true)}
       />
