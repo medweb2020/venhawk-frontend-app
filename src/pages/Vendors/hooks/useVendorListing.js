@@ -22,7 +22,7 @@ const FILTER_GROUP_OPTIONS_CACHE = {
 let filterGroupsInFlightPromise = null;
 const PROJECT_RECOMMENDATIONS_CACHE = new Map();
 const PROJECT_RECOMMENDATIONS_IN_FLIGHT = new Map();
-const PROJECT_RECOMMENDATIONS_CACHE_TTL_MS = 60 * 1000;
+const PROJECT_RECOMMENDATIONS_CACHE_TTL_MS = 5 * 60 * 1000;
 const VENDOR_LISTING_UI_STATE = {
   filters: createDefaultFilters(),
   searchInput: '',

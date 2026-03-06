@@ -3,6 +3,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { vendorsAPI } from '../../../services/api';
 import { preloadImages } from '../../../utils/imagePreload';
 
+const VENDOR_DETAIL_CACHE = new Map();
+const VENDOR_DETAIL_IN_FLIGHT = new Map();
+const VENDOR_DETAIL_CACHE_TTL_MS = 5 * 60 * 1000;
+
 const toInitials = (name) => {
   const words = String(name || '')
     .trim()
@@ -38,6 +42,16 @@ const uniqueBy = (items, keySelector) => {
     return true;
   });
 };
+
+const getVendorDetailCacheKey = (vendorId, projectId) =>
+  `vendor:${String(vendorId || '').trim()};project:${projectId ?? 'none'}`;
+
+const getVendorDetailImageUrls = (vendor) => [
+  vendor?.logoUrl,
+  ...(Array.isArray(vendor?.keyClients)
+    ? vendor.keyClients.map((client) => client?.logoSrc)
+    : []),
+];
 
 const normalizeVendorDetailResponse = (response) => {
   const keyClients = Array.isArray(response?.keyClients) ? response.keyClients : [];
@@ -93,7 +107,10 @@ export const useVendorDetail = (vendorId, projectId = null) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const loadVendor = useCallback(async (isMounted = () => true) => {
+  const loadVendor = useCallback(async (isMounted = () => true, options = {}) => {
+    const forceRefresh = options?.force === true;
+    let requestPromise;
+
     if (!vendorId) {
       if (isMounted()) {
         setVendor(null);
@@ -103,36 +120,73 @@ export const useVendorDetail = (vendorId, projectId = null) => {
       return;
     }
 
+    const cacheKey = getVendorDetailCacheKey(vendorId, projectId);
+    const cachedEntry = VENDOR_DETAIL_CACHE.get(cacheKey);
+    const isCachedEntryFresh = Boolean(cachedEntry)
+      && Date.now() - Number(cachedEntry?.cachedAt || 0) < VENDOR_DETAIL_CACHE_TTL_MS;
+
+    if (!forceRefresh && isCachedEntryFresh) {
+      if (isMounted()) {
+        setVendor(cachedEntry.vendor);
+        setError('');
+        setLoading(false);
+      }
+      return;
+    }
+
+    if (cachedEntry && !isCachedEntryFresh) {
+      VENDOR_DETAIL_CACHE.delete(cacheKey);
+    }
+
     if (isMounted()) {
       setLoading(true);
       setError('');
     }
 
     try {
-      const accessToken = await getAccessTokenSilently();
-      const response = await vendorsAPI.getVendorDetail(vendorId, accessToken, {
-        projectId,
+      requestPromise = forceRefresh
+        ? null
+        : VENDOR_DETAIL_IN_FLIGHT.get(cacheKey);
+
+      if (!requestPromise) {
+        requestPromise = (async () => {
+          const accessToken = await getAccessTokenSilently();
+          const response = await vendorsAPI.getVendorDetail(vendorId, accessToken, {
+            projectId,
+          });
+          const normalizedResponse = normalizeVendorDetailResponse(response);
+          await preloadImages(getVendorDetailImageUrls(normalizedResponse), {
+            timeoutMs: 7000,
+          });
+
+          return normalizedResponse;
+        })();
+
+        VENDOR_DETAIL_IN_FLIGHT.set(cacheKey, requestPromise);
+      }
+
+      const normalizedResponse = await requestPromise;
+      VENDOR_DETAIL_CACHE.set(cacheKey, {
+        vendor: normalizedResponse,
+        cachedAt: Date.now(),
       });
-      const normalizedResponse = normalizeVendorDetailResponse(response);
-      await preloadImages(
-        [
-          normalizedResponse?.logoUrl,
-          ...(Array.isArray(normalizedResponse?.keyClients)
-            ? normalizedResponse.keyClients.map((client) => client?.logoSrc)
-            : []),
-        ],
-        { timeoutMs: 7000 },
-      );
 
       if (isMounted()) {
         setVendor(normalizedResponse);
       }
     } catch (err) {
+      if (VENDOR_DETAIL_IN_FLIGHT.get(cacheKey) === requestPromise) {
+        VENDOR_DETAIL_IN_FLIGHT.delete(cacheKey);
+      }
       if (isMounted()) {
         setVendor(null);
         setError(err.message || 'Failed to load vendor details.');
       }
     } finally {
+      if (VENDOR_DETAIL_IN_FLIGHT.get(cacheKey) === requestPromise) {
+        VENDOR_DETAIL_IN_FLIGHT.delete(cacheKey);
+      }
+
       if (isMounted()) {
         setLoading(false);
       }
@@ -153,7 +207,7 @@ export const useVendorDetail = (vendorId, projectId = null) => {
     vendor,
     loading,
     error,
-    reload: loadVendor,
+    reload: () => loadVendor(() => true, { force: true }),
   };
 };
 
