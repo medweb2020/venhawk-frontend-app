@@ -22,32 +22,34 @@ const ClientLogoBadge = ({ client }) => {
   });
   const shouldShowImage = Boolean(client.logoSrc) && isLoaded && !hasError;
 
-  if (shouldShowImage) {
-    return (
-      <img
-        src={client.logoSrc}
-        alt={client.label}
-        className={client.logoClassName || 'max-h-[34px] sm:max-h-[40px] max-w-[120px] sm:max-w-[148px] w-auto object-contain'}
-        loading="lazy"
-        decoding="async"
-        referrerPolicy="no-referrer"
-      />
-    );
-  }
-
-  if (isPending && client.logoSrc) {
-    return (
-      <div className="h-[34px] sm:h-[40px] w-[120px] sm:w-[148px] rounded-[8px] animate-pulse bg-[linear-gradient(135deg,#F4F6F8_0%,#E6EBF1_48%,#F8FAFC_100%)]" />
-    );
-  }
-
   return (
-    <div className="h-[52px] w-[120px] sm:h-[58px] sm:w-[138px] rounded-[10px] border border-[#D8DEE5] bg-[linear-gradient(145deg,#F7FAFD_0%,#EBF1F8_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] px-2 flex items-center justify-center">
-      <div className="text-center leading-[1.1]">
-        <p className="text-[12px] sm:text-[13px] font-semibold text-[#40566E] tracking-[0.03em]">
-          {initials}
-        </p>
-        <p className="mt-[2px] text-[9px] sm:text-[10px] font-medium text-[#5A6D82] truncate max-w-[110px] sm:max-w-[128px]">
+    <div className="flex w-full max-w-[248px] flex-col items-center justify-center gap-3 text-center">
+      <div className="flex h-[92px] w-full items-center justify-center px-3">
+        {shouldShowImage ? (
+          <img
+            src={client.logoSrc}
+            alt={client.label}
+            className={
+              client.logoClassName ||
+              'max-h-[64px] sm:max-h-[74px] max-w-[176px] sm:max-w-[198px] w-auto object-contain'
+            }
+            loading="lazy"
+            decoding="async"
+            referrerPolicy="no-referrer"
+          />
+        ) : isPending && client.logoSrc ? (
+          <div className="h-[64px] sm:h-[74px] w-[176px] sm:w-[198px] rounded-[10px] animate-pulse border border-[#EEF2F6] bg-white" />
+        ) : (
+          <div className="h-[72px] w-[176px] sm:h-[80px] sm:w-[198px] rounded-[14px] border border-[#E7EDF3] bg-white px-2 flex items-center justify-center">
+            <p className="text-[22px] sm:text-[24px] font-semibold text-[#31485F] tracking-[0.03em]">
+              {initials}
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="flex min-h-[40px] sm:min-h-[52px] flex-col items-center justify-start">
+        <p className="max-w-[228px] text-[14px] sm:text-[15px] font-semibold leading-[1.15] text-[#31475D]">
           {client.label}
         </p>
       </div>
@@ -71,11 +73,11 @@ const KeyClientsSection = ({ clients }) => {
         ref={scrollerRef}
         className="mt-6 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
-        <div className="inline-flex min-w-full border border-[#F1F1F1] bg-[#FCFCFC]">
+        <div className="inline-flex min-w-full border border-[#F1F1F1] bg-white">
           {clients.map((client) => (
             <div
               key={client.id}
-              className="h-[86px] sm:h-[96px] min-w-[180px] sm:min-w-[220px] px-6 sm:px-8 flex items-center justify-center"
+              className="min-w-[260px] sm:min-w-[304px] px-6 sm:px-8 py-5 sm:py-6 flex items-center justify-center"
             >
               <a
                 href={client.websiteUrl || undefined}
