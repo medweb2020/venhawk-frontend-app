@@ -1,6 +1,7 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useCallback, useEffect, useState } from 'react';
 import { vendorsAPI } from '../../../services/api';
+import { preloadImages } from '../../../utils/imagePreload';
 
 const toInitials = (name) => {
   const words = String(name || '')
@@ -112,9 +113,19 @@ export const useVendorDetail = (vendorId, projectId = null) => {
       const response = await vendorsAPI.getVendorDetail(vendorId, accessToken, {
         projectId,
       });
+      const normalizedResponse = normalizeVendorDetailResponse(response);
+      await preloadImages(
+        [
+          normalizedResponse?.logoUrl,
+          ...(Array.isArray(normalizedResponse?.keyClients)
+            ? normalizedResponse.keyClients.map((client) => client?.logoSrc)
+            : []),
+        ],
+        { timeoutMs: 7000 },
+      );
 
       if (isMounted()) {
-        setVendor(normalizeVendorDetailResponse(response));
+        setVendor(normalizedResponse);
       }
     } catch (err) {
       if (isMounted()) {

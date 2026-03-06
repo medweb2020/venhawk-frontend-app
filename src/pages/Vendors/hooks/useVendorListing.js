@@ -1,6 +1,7 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { projectAPI, vendorsAPI } from '../../../services/api';
+import { preloadImages } from '../../../utils/imagePreload';
 import { searchVendors } from '../search/vendorSearchEngine';
 
 const LISTING_DEBOUNCE_MS = 180;
@@ -156,6 +157,12 @@ export const useVendorListing = ({ projectId } = {}) => {
         if (!isFresh) {
           PROJECT_RECOMMENDATIONS_CACHE.delete(cacheKey);
         } else {
+          await preloadImages(
+            Array.isArray(cached?.vendors)
+              ? cached.vendors.map((vendor) => vendor?.logoUrl)
+              : [],
+            { timeoutMs: 7000 },
+          );
           if (isMounted() && requestId === vendorsRequestRef.current) {
             setAllVendors(cached.vendors);
             setRecommendationsMeta(cached.meta);
@@ -197,6 +204,12 @@ export const useVendorListing = ({ projectId } = {}) => {
       }
 
       const recommendationResult = await requestPromise;
+      await preloadImages(
+        Array.isArray(recommendationResult?.vendors)
+          ? recommendationResult.vendors.map((vendor) => vendor?.logoUrl)
+          : [],
+        { timeoutMs: 7000 },
+      );
       PROJECT_RECOMMENDATIONS_CACHE.set(cacheKey, {
         ...recommendationResult,
         cachedAt: Date.now(),

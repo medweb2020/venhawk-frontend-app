@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import { useCachedImageStatus } from '../../../utils/imagePreload';
 
 const getVendorInitials = (name = '') => {
   const trimmedName = name.trim();
@@ -28,15 +29,14 @@ const VendorImage = ({
   objectPosition = 'center',
   fallbackText,
   loading = 'lazy',
+  cacheTimeoutMs = 7000,
+  placeholderClassName = '',
 }) => {
-  const [hasError, setHasError] = useState(false);
-
-  useEffect(() => {
-    setHasError(false);
-  }, [src]);
-
   const initials = useMemo(() => getVendorInitials(name), [name]);
-  const shouldShowImage = Boolean(src) && !hasError;
+  const { isLoaded, hasError, isPending } = useCachedImageStatus(src, {
+    timeoutMs: cacheTimeoutMs,
+  });
+  const shouldShowImage = Boolean(src) && isLoaded && !hasError;
 
   return (
     <div className={`relative overflow-hidden ${wrapperClassName}`}>
@@ -48,7 +48,12 @@ const VendorImage = ({
           style={{ objectFit, objectPosition }}
           referrerPolicy="no-referrer"
           loading={loading}
-          onError={() => setHasError(true)}
+          decoding="async"
+        />
+      ) : isPending && src ? (
+        <div
+          className={`w-full h-full animate-pulse bg-[linear-gradient(135deg,#F4F6F8_0%,#E6EBF1_48%,#F8FAFC_100%)] ${placeholderClassName}`}
+          aria-hidden="true"
         />
       ) : (
         <div

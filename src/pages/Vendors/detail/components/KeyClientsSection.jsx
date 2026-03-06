@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef } from 'react';
+import { useCachedImageStatus } from '../../../../utils/imagePreload';
 
 const buildClientInitials = (label) => {
   const words = String(label || '')
@@ -15,9 +16,11 @@ const buildClientInitials = (label) => {
 };
 
 const ClientLogoBadge = ({ client }) => {
-  const [logoLoadFailed, setLogoLoadFailed] = useState(false);
   const initials = useMemo(() => buildClientInitials(client.label), [client.label]);
-  const shouldShowImage = Boolean(client.logoSrc) && !logoLoadFailed;
+  const { isLoaded, hasError, isPending } = useCachedImageStatus(client.logoSrc, {
+    timeoutMs: 7000,
+  });
+  const shouldShowImage = Boolean(client.logoSrc) && isLoaded && !hasError;
 
   if (shouldShowImage) {
     return (
@@ -26,8 +29,15 @@ const ClientLogoBadge = ({ client }) => {
         alt={client.label}
         className={client.logoClassName || 'max-h-[34px] sm:max-h-[40px] max-w-[120px] sm:max-w-[148px] w-auto object-contain'}
         loading="lazy"
-        onError={() => setLogoLoadFailed(true)}
+        decoding="async"
+        referrerPolicy="no-referrer"
       />
+    );
+  }
+
+  if (isPending && client.logoSrc) {
+    return (
+      <div className="h-[34px] sm:h-[40px] w-[120px] sm:w-[148px] rounded-[8px] animate-pulse bg-[linear-gradient(135deg,#F4F6F8_0%,#E6EBF1_48%,#F8FAFC_100%)]" />
     );
   }
 
