@@ -25,7 +25,7 @@ const VendorCard = ({ vendor, projectId }) => {
 
   return (
     <Link to={detailPath} className="block h-full group cursor-pointer">
-      <article className="h-full min-h-[360px] bg-[#FCFCFC] border border-[#E9EAEC] rounded-[14px] p-6 transition-all duration-200 group-hover:shadow-md">
+      <article className="flex h-full min-h-[360px] flex-col bg-[#FCFCFC] border border-[#E9EAEC] rounded-[14px] p-6 transition-all duration-200 group-hover:shadow-md">
         <div className="relative flex gap-4 items-start mb-5">
           <VendorImage
             src={vendor.logoUrl}
@@ -74,39 +74,34 @@ const VendorCard = ({ vendor, projectId }) => {
           </div>
         </div>
 
-        <div className="mb-4">
-          <p
-            className="overflow-hidden text-[15px] sm:text-[16px] text-[#59626B] leading-[1.5] break-words"
-            style={{
-              display: '-webkit-box',
-              WebkitLineClamp: 5,
-              WebkitBoxOrient: 'vertical',
-            }}
-          >
+        <div className="flex-1">
+          <p className="text-[15px] sm:text-[16px] text-[#59626B] leading-[1.5] break-words">
             {bodyPrimaryText}
           </p>
-          <div className="mt-2 min-h-[16px]">
+        </div>
+
+        <div className="mt-4">
+          <div className="min-h-[16px]">
             {hasMatchingReason ? (
               <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#7A8792]">
                 {reasonSourceLabel}
               </p>
             ) : null}
           </div>
-        </div>
+          <div className="mt-2 grid grid-cols-2 gap-3">
+            <div className="border border-[#E9EAEC] rounded-[5px] bg-[#FCFCFC] py-2 px-4 text-center">
+              <p className="text-[10px] font-semibold text-[#697077] mb-1">Speciality</p>
+              <p className="text-[13px] font-bold bg-[linear-gradient(197deg,#0A2540_10%,#3B5166_35%,#FFA077_88%)] bg-clip-text text-transparent truncate">
+                {vendor.specialty}
+              </p>
+            </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="border border-[#E9EAEC] rounded-[5px] bg-[#FCFCFC] py-2 px-4 text-center">
-            <p className="text-[10px] font-semibold text-[#697077] mb-1">Speciality</p>
-            <p className="text-[13px] font-bold bg-[linear-gradient(197deg,#0A2540_10%,#3B5166_35%,#FFA077_88%)] bg-clip-text text-transparent truncate">
-              {vendor.specialty}
-            </p>
-          </div>
-
-          <div className="border border-[#E9EAEC] rounded-[5px] bg-[#FCFCFC] py-2 px-4 text-center">
-            <p className="text-[10px] font-semibold text-[#697077] mb-1">Start From</p>
-            <p className="text-[13px] font-bold bg-[linear-gradient(206deg,#0A2540_10%,#3B5166_35%,#FFA077_88%)] bg-clip-text text-transparent truncate">
-              {vendor.startFrom}
-            </p>
+            <div className="border border-[#E9EAEC] rounded-[5px] bg-[#FCFCFC] py-2 px-4 text-center">
+              <p className="text-[10px] font-semibold text-[#697077] mb-1">Start From</p>
+              <p className="text-[13px] font-bold bg-[linear-gradient(206deg,#0A2540_10%,#3B5166_35%,#FFA077_88%)] bg-clip-text text-transparent truncate">
+                {vendor.startFrom}
+              </p>
+            </div>
           </div>
         </div>
       </article>
