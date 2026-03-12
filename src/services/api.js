@@ -78,6 +78,26 @@ const fetchAPI = async (endpoint, options = {}, loadingOptions = {}) => {
   }, loadingOptions);
 };
 
+const fetchMultipartAPI = async (endpoint, file, accessToken) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'An error occurred' }));
+    throw new Error(error.message || 'An error occurred');
+  }
+
+  return response.json();
+};
+
 /**
  * Project API Service
  */
@@ -318,6 +338,59 @@ export const vendorsAPI = {
         Authorization: `Bearer ${accessToken}`,
       },
     });
+  },
+
+  getLogoAdminOverview: async (accessToken) => {
+    return fetchAPI('/vendors/logo-admin', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  },
+
+  getLogoAdminVendor: async (vendorId, accessToken) => {
+    return fetchAPI(`/vendors/logo-admin/vendors/${encodeURIComponent(vendorId)}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  },
+
+  uploadVendorLogo: async (vendorId, file, accessToken) => {
+    return fetchMultipartAPI(
+      `/vendors/logo-admin/vendors/${encodeURIComponent(vendorId)}/logo`,
+      file,
+      accessToken,
+    );
+  },
+
+  deleteVendorLogo: async (vendorId, accessToken) => {
+    return fetchAPI(`/vendors/logo-admin/vendors/${encodeURIComponent(vendorId)}/logo`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  },
+
+  uploadVendorClientLogo: async (vendorId, clientId, file, accessToken) => {
+    return fetchMultipartAPI(
+      `/vendors/logo-admin/vendors/${encodeURIComponent(vendorId)}/clients/${encodeURIComponent(clientId)}/logo`,
+      file,
+      accessToken,
+    );
+  },
+
+  deleteVendorClientLogo: async (vendorId, clientId, accessToken) => {
+    return fetchAPI(
+      `/vendors/logo-admin/vendors/${encodeURIComponent(vendorId)}/clients/${encodeURIComponent(clientId)}/logo`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
   },
 };
 

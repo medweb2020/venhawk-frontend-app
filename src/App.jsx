@@ -11,6 +11,7 @@ import BudgetTimeline from './pages/BudgetTimeline';
 import Summary from './pages/Summary';
 import Vendors from './pages/Vendors';
 import VendorDetail from './pages/Vendors/detail';
+import LogoAdminPage from './pages/LogoAdmin';
 import Callback from './pages/Callback';
 import NotFound from './pages/NotFound';
 import LoadingSpinner from './components/common/LoadingSpinner';
@@ -119,6 +120,14 @@ function App() {
           element={
             <ProtectedRoute>
               <LegacyVendorDetailRoute />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/logos"
+          element={
+            <ProtectedRoute>
+              <LogoAdminPage />
             </ProtectedRoute>
           }
         />
