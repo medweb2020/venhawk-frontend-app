@@ -11,7 +11,7 @@ import BudgetTimeline from './pages/BudgetTimeline';
 import Summary from './pages/Summary';
 import Vendors from './pages/Vendors';
 import VendorDetail from './pages/Vendors/detail';
-import LogoAdminPage from './pages/LogoAdmin';
+import VendorAdminPage from './pages/Admin/Vendors';
 import Callback from './pages/Callback';
 import NotFound from './pages/NotFound';
 import LoadingSpinner from './components/common/LoadingSpinner';
@@ -124,12 +124,16 @@ function App() {
           }
         />
         <Route
-          path="/admin/logos"
+          path="/admin/vendors"
           element={
             <ProtectedRoute>
-              <LogoAdminPage />
+              <VendorAdminPage />
             </ProtectedRoute>
           }
+        />
+        <Route
+          path="/admin/logos"
+          element={<Navigate to="/admin/vendors" replace />}
         />
 
         {/* 404 Not Found - catch all unmatched routes */}

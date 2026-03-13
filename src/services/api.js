@@ -55,11 +55,11 @@ const fetchAPI = async (endpoint, options = {}, loadingOptions = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
 
   const defaultOptions = {
+    ...options,
     headers: {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...(options.headers || {}),
     },
-    ...options,
   };
 
   return withAppLoader(async () => {
@@ -74,7 +74,16 @@ const fetchAPI = async (endpoint, options = {}, loadingOptions = {}) => {
       throw new Error(errorMessage);
     }
 
-    return await response.json();
+    if (response.status === 204) {
+      return null;
+    }
+
+    const responseText = await response.text();
+    if (!responseText) {
+      return null;
+    }
+
+    return JSON.parse(responseText);
   }, loadingOptions);
 };
 
@@ -340,32 +349,96 @@ export const vendorsAPI = {
     });
   },
 
-  getLogoAdminOverview: async (accessToken) => {
-    return fetchAPI('/vendors/logo-admin', {
+  getVendorAdminOverview: async (accessToken) => {
+    return fetchAPI('/vendors/admin', {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
   },
 
-  getLogoAdminVendor: async (vendorId, accessToken) => {
-    return fetchAPI(`/vendors/logo-admin/vendors/${encodeURIComponent(vendorId)}`, {
+  getVendorAdminVendor: async (vendorId, accessToken) => {
+    return fetchAPI(`/vendors/admin/vendors/${encodeURIComponent(vendorId)}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
+  },
+
+  createVendorAdminVendor: async (payload, accessToken) => {
+    return fetchAPI('/vendors/admin/vendors', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(payload),
+    });
+  },
+
+  updateVendorAdminVendor: async (vendorId, payload, accessToken) => {
+    return fetchAPI(`/vendors/admin/vendors/${encodeURIComponent(vendorId)}`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(payload),
+    });
+  },
+
+  deleteVendorAdminVendor: async (vendorId, accessToken) => {
+    return fetchAPI(`/vendors/admin/vendors/${encodeURIComponent(vendorId)}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  },
+
+  createVendorAdminClient: async (vendorId, payload, accessToken) => {
+    return fetchAPI(`/vendors/admin/vendors/${encodeURIComponent(vendorId)}/clients`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(payload),
+    });
+  },
+
+  updateVendorAdminClient: async (vendorId, clientId, payload, accessToken) => {
+    return fetchAPI(
+      `/vendors/admin/vendors/${encodeURIComponent(vendorId)}/clients/${encodeURIComponent(clientId)}`,
+      {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+  },
+
+  deleteVendorAdminClient: async (vendorId, clientId, accessToken) => {
+    return fetchAPI(
+      `/vendors/admin/vendors/${encodeURIComponent(vendorId)}/clients/${encodeURIComponent(clientId)}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
   },
 
   uploadVendorLogo: async (vendorId, file, accessToken) => {
     return fetchMultipartAPI(
-      `/vendors/logo-admin/vendors/${encodeURIComponent(vendorId)}/logo`,
+      `/vendors/admin/vendors/${encodeURIComponent(vendorId)}/logo`,
       file,
       accessToken,
     );
   },
 
   deleteVendorLogo: async (vendorId, accessToken) => {
-    return fetchAPI(`/vendors/logo-admin/vendors/${encodeURIComponent(vendorId)}/logo`, {
+    return fetchAPI(`/vendors/admin/vendors/${encodeURIComponent(vendorId)}/logo`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -375,7 +448,7 @@ export const vendorsAPI = {
 
   uploadVendorClientLogo: async (vendorId, clientId, file, accessToken) => {
     return fetchMultipartAPI(
-      `/vendors/logo-admin/vendors/${encodeURIComponent(vendorId)}/clients/${encodeURIComponent(clientId)}/logo`,
+      `/vendors/admin/vendors/${encodeURIComponent(vendorId)}/clients/${encodeURIComponent(clientId)}/logo`,
       file,
       accessToken,
     );
@@ -383,7 +456,50 @@ export const vendorsAPI = {
 
   deleteVendorClientLogo: async (vendorId, clientId, accessToken) => {
     return fetchAPI(
-      `/vendors/logo-admin/vendors/${encodeURIComponent(vendorId)}/clients/${encodeURIComponent(clientId)}/logo`,
+      `/vendors/admin/vendors/${encodeURIComponent(vendorId)}/clients/${encodeURIComponent(clientId)}/logo`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+  },
+
+  createVendorAdminCaseStudy: async (vendorId, payload, accessToken) => {
+    return fetchAPI(
+      `/vendors/admin/vendors/${encodeURIComponent(vendorId)}/case-studies`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+  },
+
+  updateVendorAdminCaseStudy: async (
+    vendorId,
+    caseStudyId,
+    payload,
+    accessToken,
+  ) => {
+    return fetchAPI(
+      `/vendors/admin/vendors/${encodeURIComponent(vendorId)}/case-studies/${encodeURIComponent(caseStudyId)}`,
+      {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+  },
+
+  deleteVendorAdminCaseStudy: async (vendorId, caseStudyId, accessToken) => {
+    return fetchAPI(
+      `/vendors/admin/vendors/${encodeURIComponent(vendorId)}/case-studies/${encodeURIComponent(caseStudyId)}`,
       {
         method: 'DELETE',
         headers: {
